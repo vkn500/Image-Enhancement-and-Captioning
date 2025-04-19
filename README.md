@@ -23,7 +23,7 @@ A web application that enhances images and generates captions using machine lear
 
 1. Clone the repository:
    ```
-   git clone https://github.com/yourusername/image-enhancer.git
+   https://github.com/vkn500/Image-Enhancement-and-Captioning.git
    cd image-enhancer
    ```
 
