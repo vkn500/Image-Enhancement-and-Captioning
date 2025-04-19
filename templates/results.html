@@ -1,0 +1,1301 @@
+{% extends 'base.html' %}
+
+{% block title %}Results - Image Enhancer{% endblock %}
+
+{% block content %}
+<div class="container">
+    <div class="results-container">
+        <h1 class="section-title">Enhancement Results</h1>
+        <p class="section-subtitle">See the before and after comparison of your image.</p>
+        
+        <!-- Floating Toolbar -->
+        <div class="floating-toolbar collapsed" id="editingToolbar">
+            <div class="toolbar-header">
+                <h3>Image Editing Tools</h3>
+                <div class="toolbar-controls">
+                    <button class="toolbar-btn" id="expand-toolbar" title="Expand"><i class="fas fa-expand-alt"></i></button>
+                    <button class="toolbar-btn" id="collapse-toolbar" style="display: none;" title="Collapse"><i class="fas fa-compress-alt"></i></button>
+                </div>
+            </div>
+            <div class="toolbar-content" id="toolbar-content" style="display: none;">
+                <!-- Rotate Controls -->
+                <div class="toolbar-section">
+                    <h4>Rotate</h4>
+                    <div class="toolbar-controls">
+                        <button class="editor-control btn" data-action="rotate" data-value="90">90°</button>
+                        <button class="editor-control btn" data-action="rotate" data-value="180">180°</button>
+                        <button class="editor-control btn" data-action="rotate" data-value="270">270°</button>
+                    </div>
+                </div>
+
+                <!-- Flip Controls -->
+                <div class="toolbar-section">
+                    <h4>Flip</h4>
+                    <div class="toolbar-controls">
+                        <button class="editor-control btn" data-action="flip" data-value="horizontal">Horizontal</button>
+                        <button class="editor-control btn" data-action="flip" data-value="vertical">Vertical</button>
+                    </div>
+                </div>
+
+                <!-- Filter Controls -->
+                <div class="toolbar-section">
+                    <h4>Filters</h4>
+                    <div class="toolbar-controls">
+                        <button class="editor-control btn" data-filter="contrast" data-value="120">High Contrast</button>
+                        <button class="editor-control btn" data-filter="contrast" data-value="80">Low Contrast</button>
+                        <button class="editor-control btn" data-filter="saturation" data-value="150">Vibrant</button>
+                        <button class="editor-control btn" data-filter="saturation" data-value="50">Muted</button>
+                    </div>
+                </div>
+
+                <!-- Brightness Controls -->
+                <div class="toolbar-section">
+                    <h4>Brightness</h4>
+                    <div class="toolbar-controls">
+                        <input type="range" id="brightness" min="50" max="150" value="100">
+                    </div>
+                </div>
+
+                <!-- Reset Button -->
+                <div class="toolbar-section">
+                    <button class="editor-control btn btn-reset" id="reset-image">Reset Image</button>
+                </div>
+            </div>
+        </div>
+
+        <!-- Side-by-side Image Comparison -->
+        <div class="image-comparison-container">
+            <p class="section-subtitle">See the before and after comparison of your image.</p>
+            
+            <!-- Slider Comparison (Only View) -->
+            <div id="slider-view">
+                <div class="slider-comparison">
+                    <h3 class="comparison-title">Drag Slider to Compare</h3>
+                    <div class="comparison-wrapper">
+                        <img src="{{ url_for('static', filename='uploads/' + original_image) }}" 
+                             alt="Original Image" 
+                             class="slider-image original">
+                        <img src="{{ url_for('static', filename='enhanced/' + enhanced_image) }}" 
+                             alt="Enhanced Image" 
+                             class="slider-image enhanced">
+                        <div class="comparison-slider">
+                            <div class="slider-handle"></div>
+                        </div>
+                    </div>
+                    <div class="comparison-labels">
+                        <span>Original</span>
+                        <span>Enhanced</span>
+                    </div>
+                </div>
+            </div>
+        </div>
+        
+        {% if caption %}
+        <div class="caption-container">
+            <h3 class="caption-title">Image Caption</h3>
+            <p class="caption-text">{{ caption }}</p>
+        </div>
+        {% endif %}
+        
+        <div class="action-buttons">
+            <a href="{{ url_for('download', filename=enhanced_image) }}" class="btn primary-btn" download>Download Enhanced Image</a>
+            <a href="{{ url_for('history') }}" class="btn primary-btn">View History</a>
+            <a href="{{ url_for('upload_page') }}" class="btn primary-btn">Enhance Another Image</a>
+            <a href="{{ url_for('camera_page') }}" class="btn primary-btn">Take Another Photo</a>
+        </div>
+    </div>
+</div>
+{% endblock %}
+
+{% block extra_js %}
+<script>
+    document.addEventListener('DOMContentLoaded', function() {
+        // DIRECT CONNECTION TO SETTINGS
+        // This function will be called from the settings page
+        window.updateAccentColorFromSettings = function(color) {
+            console.log('Direct update called with color:', color);
+            if (color) {
+                localStorage.setItem('accentColor', color);
+            }
+            applyAccentColorImmediately();
+            return true; // Confirm the update was received
+        };
+        
+        // Apply accent color IMMEDIATELY with no transitions
+        function applyAccentColorImmediately() {
+            const accentColor = localStorage.getItem('accentColor') || '#6c5ce7';
+            console.log('FORCE APPLYING accent color:', accentColor);
+            
+            // Apply to root element
+            document.documentElement.style.setProperty('--accent-color', accentColor);
+            document.documentElement.style.setProperty('--accent-color-light', accentColor + '33');
+            document.documentElement.style.setProperty('--accent-color-medium', accentColor + '80');
+            document.documentElement.style.setProperty('--accent-color-dark', accentColor + 'cc');
+            
+            // Direct application to all elements that need the accent color
+            const elementsToStyle = [
+                { selector: '.primary-btn', style: { backgroundColor: accentColor, borderColor: accentColor } },
+                { selector: '.floating-toolbar', style: { backgroundColor: accentColor } },
+                { selector: '.toolbar-header', style: { backgroundColor: accentColor } },
+                { selector: '.comparison-slider', style: { background: `linear-gradient(to bottom, ${accentColor}, ${accentColor}aa)` } },
+                { selector: '.slider-handle', style: { background: `linear-gradient(135deg, ${accentColor}, ${accentColor}cc)` } },
+                { selector: '.caption-title', style: { color: accentColor } },
+                { selector: '.comparison-title', style: { color: accentColor } },
+                { selector: '.caption-title:after', style: { backgroundColor: accentColor } },
+                { selector: '.comparison-title:after', style: { backgroundColor: accentColor } },
+                { selector: '.caption-container:before', style: { backgroundColor: accentColor } },
+                { selector: '.caption-container:after', style: { backgroundColor: accentColor } },
+                { selector: '.editor-control.active', style: { backgroundColor: accentColor, borderColor: accentColor } }
+            ];
+            
+            // Apply styles directly to all matching elements
+            elementsToStyle.forEach(item => {
+                document.querySelectorAll(item.selector).forEach(el => {
+                    Object.assign(el.style, item.style);
+                });
+            });
+            
+            // Force browser to repaint
+            const tempDisplay = document.body.style.display;
+            document.body.style.display = 'none';
+            document.body.offsetHeight; // Force reflow
+            document.body.style.display = tempDisplay;
+            
+            // Show confirmation
+            showStatus('Accent color updated!', 'success');
+        }
+        
+        // Original applyAccentColor function
+        function applyAccentColor() {
+            // Force immediate update by directly checking localStorage
+            const accentColor = localStorage.getItem('accentColor') || '#6c5ce7';
+            console.log('Applying accent color:', accentColor);
+            
+            // Apply to DOM elements directly
+            document.documentElement.style.setProperty('--accent-color', accentColor);
+            
+            // Apply to specific elements that need direct styling
+            const elementsToStyle = {
+                '.floating-toolbar': { backgroundColor: accentColor },
+                '.toolbar-header': { backgroundColor: accentColor },
+                '.primary-btn': { backgroundColor: accentColor, borderColor: accentColor },
+                '.slider-handle': { background: `linear-gradient(135deg, ${accentColor}, ${accentColor}cc)` },
+                '.comparison-slider': { background: `linear-gradient(to bottom, ${accentColor}, ${accentColor}aa)` },
+                '.caption-title': { color: accentColor },
+                '.comparison-title': { color: accentColor },
+                '.caption-container:before': { backgroundColor: accentColor },
+                '.caption-title:after': { backgroundColor: accentColor },
+                '.caption-container:after': { backgroundColor: accentColor },
+                '.comparison-title:after': { backgroundColor: accentColor },
+                '.editor-control.active': { backgroundColor: accentColor, borderColor: accentColor }
+            };
+            
+            // Apply styles directly to elements
+            Object.keys(elementsToStyle).forEach(selector => {
+                const elements = document.querySelectorAll(selector);
+                elements.forEach(el => {
+                    Object.assign(el.style, elementsToStyle[selector]);
+                });
+            });
+            
+            // Create or update CSS variables
+            let styleEl = document.getElementById('dynamic-accent-style');
+            if (!styleEl) {
+                styleEl = document.createElement('style');
+                styleEl.id = 'dynamic-accent-style';
+                document.head.appendChild(styleEl);
+            }
+            
+            // Create CSS with variables
+            styleEl.textContent = `
+                :root {
+                    --accent-color: ${accentColor};
+                    --accent-color-light: ${accentColor}33;
+                    --accent-color-medium: ${accentColor}80;
+                    --accent-color-dark: ${accentColor}cc;
+                }
+                
+                .primary-btn, .editor-control.active {
+                    background-color: var(--accent-color) !important;
+                    border-color: var(--accent-color) !important;
+                }
+                
+                .floating-toolbar, .toolbar-header {
+                    background-color: var(--accent-color) !important;
+                }
+                
+                .comparison-slider {
+                    background: linear-gradient(to bottom, var(--accent-color), var(--accent-color-dark)) !important;
+                }
+                
+                .slider-handle {
+                    background: linear-gradient(135deg, var(--accent-color), var(--accent-color-dark)) !important;
+                    box-shadow: 0 0 15px var(--accent-color-medium) !important;
+                }
+                
+                .slider-handle:hover {
+                    box-shadow: 0 0 20px var(--accent-color-dark) !important;
+                }
+                
+                .caption-title, .comparison-title {
+                    color: var(--accent-color) !important;
+                }
+                
+                .caption-container:before, .caption-title:after, .caption-container:after, .comparison-title:after {
+                    background-color: var(--accent-color) !important;
+                }
+                
+                .action-buttons .primary-btn:hover {
+                    box-shadow: 0 7px 14px var(--accent-color-light) !important;
+                }
+                
+                .toggle-view-btn.active {
+                    background-color: var(--accent-color) !important;
+                    border-color: var(--accent-color) !important;
+                    box-shadow: 0 4px 12px var(--accent-color-medium) !important;
+                }
+            `;
+            
+            // Force a repaint to ensure changes are applied
+            document.body.style.display = 'none';
+            document.body.offsetHeight; // Force a reflow
+            document.body.style.display = '';
+            
+            console.log('Accent color applied successfully');
+        }
+        
+        // Call immediately on page load
+        applyAccentColorImmediately();
+        
+        // Create a button to force update accent color (for testing)
+        const forceUpdateBtn = document.createElement('button');
+        forceUpdateBtn.textContent = 'Update Accent Color';
+        forceUpdateBtn.style.position = 'fixed';
+        forceUpdateBtn.style.bottom = '10px';
+        forceUpdateBtn.style.right = '10px';
+        forceUpdateBtn.style.zIndex = '9999';
+        forceUpdateBtn.style.padding = '8px 12px';
+        forceUpdateBtn.style.backgroundColor = '#333';
+        forceUpdateBtn.style.color = 'white';
+        forceUpdateBtn.style.border = 'none';
+        forceUpdateBtn.style.borderRadius = '4px';
+        forceUpdateBtn.style.cursor = 'pointer';
+        forceUpdateBtn.onclick = function() {
+            applyAccentColorImmediately();
+        };
+        document.body.appendChild(forceUpdateBtn);
+        
+        // Add a color picker for direct testing
+        const colorPicker = document.createElement('input');
+        colorPicker.type = 'color';
+        colorPicker.value = localStorage.getItem('accentColor') || '#6c5ce7';
+        colorPicker.style.position = 'fixed';
+        colorPicker.style.bottom = '10px';
+        colorPicker.style.right = '180px';
+        colorPicker.style.zIndex = '9999';
+        colorPicker.style.width = '40px';
+        colorPicker.style.height = '40px';
+        colorPicker.style.padding = '0';
+        colorPicker.style.border = 'none';
+        colorPicker.style.borderRadius = '4px';
+        colorPicker.style.cursor = 'pointer';
+        colorPicker.onchange = function() {
+            localStorage.setItem('accentColor', this.value);
+            applyAccentColorImmediately();
+        };
+        document.body.appendChild(colorPicker);
+        
+        // Set up multiple ways to detect changes
+        
+        // 1. Storage event listener
+        window.addEventListener('storage', function(e) {
+            if (e.key === 'accentColor') {
+                console.log('Storage event detected:', e.newValue);
+                applyAccentColor();
+            }
+        });
+        
+        // 2. Custom event listener
+        window.addEventListener('accentColorChanged', function(e) {
+            console.log('Custom event detected:', e.detail);
+            applyAccentColor();
+        });
+        
+        // 3. Polling for changes
+        let lastKnownAccentColor = localStorage.getItem('accentColor');
+        setInterval(function() {
+            const currentAccentColor = localStorage.getItem('accentColor');
+            if (currentAccentColor !== lastKnownAccentColor) {
+                console.log('Polling detected change:', currentAccentColor);
+                lastKnownAccentColor = currentAccentColor;
+                applyAccentColor();
+            }
+        }, 1000);
+        
+        // 4. MutationObserver to watch for DOM changes
+        const observer = new MutationObserver(function(mutations) {
+            mutations.forEach(function(mutation) {
+                if (mutation.type === 'attributes' && 
+                    (mutation.target.classList.contains('dark-mode') || 
+                     mutation.target.id === 'theme-style')) {
+                    console.log('DOM mutation detected');
+                    applyAccentColor();
+                }
+            });
+        });
+        
+        observer.observe(document.documentElement, { 
+            attributes: true,
+            childList: false,
+            subtree: true
+        });
+        
+        // Initialize slider functionality
+        function initSlider() {
+            const slider = document.querySelector('.comparison-slider');
+            const enhancedImage = document.querySelector('.slider-image.enhanced');
+            const wrapper = document.querySelector('.comparison-wrapper');
+            
+            if (!slider || !enhancedImage || !wrapper) return;
+            
+            let isDown = false;
+            
+            function updateSliderPosition(clientX) {
+                const rect = wrapper.getBoundingClientRect();
+                const position = (clientX - rect.left) / rect.width;
+                const percentage = Math.max(0, Math.min(1, position)) * 100;
+                
+                // Add smooth animation when not dragging
+                if (!isDown) {
+                    slider.style.transition = 'left 0.3s ease';
+                    enhancedImage.style.transition = 'clip-path 0.3s ease';
+                } else {
+                    slider.style.transition = 'none';
+                    enhancedImage.style.transition = 'none';
+                }
+                
+                slider.style.left = `${percentage}%`;
+                enhancedImage.style.clipPath = `inset(0 0 0 ${percentage}%)`;
+            }
+            
+            slider.addEventListener('mousedown', function(e) {
+                isDown = true;
+                slider.style.transition = 'none';
+                enhancedImage.style.transition = 'none';
+                updateSliderPosition(e.clientX);
+                // Add active effect
+                slider.style.boxShadow = '0 0 20px rgba(108, 92, 231, 0.7)';
+            });
+            
+            wrapper.addEventListener('mousemove', function(e) {
+                if (!isDown) return;
+                updateSliderPosition(e.clientX);
+            });
+            
+            wrapper.addEventListener('mouseup', function() {
+                isDown = false;
+                // Remove active effect
+                slider.style.boxShadow = '';
+            });
+            
+            wrapper.addEventListener('mouseleave', function() {
+                isDown = false;
+                // Remove active effect
+                slider.style.boxShadow = '';
+            });
+            
+            // Touch support
+            slider.addEventListener('touchstart', function(e) {
+                isDown = true;
+                slider.style.transition = 'none';
+                enhancedImage.style.transition = 'none';
+                updateSliderPosition(e.touches[0].clientX);
+                // Add active effect
+                slider.style.boxShadow = '0 0 20px rgba(108, 92, 231, 0.7)';
+            });
+            
+            wrapper.addEventListener('touchmove', function(e) {
+                if (!isDown) return;
+                updateSliderPosition(e.touches[0].clientX);
+            });
+            
+            wrapper.addEventListener('touchend', function() {
+                isDown = false;
+                // Remove active effect
+                slider.style.boxShadow = '';
+            });
+            
+            // Set initial position with animation
+            setTimeout(() => {
+                updateSliderPosition(wrapper.getBoundingClientRect().left + wrapper.getBoundingClientRect().width / 2);
+            }, 300);
+            
+            // Add subtle animation to slider handle
+            const handle = document.querySelector('.slider-handle');
+            if (handle) {
+                setInterval(() => {
+                    if (!isDown) {
+                        handle.style.boxShadow = '0 0 15px rgba(108, 92, 231, 0.7)';
+                        setTimeout(() => {
+                            handle.style.boxShadow = '0 0 10px rgba(108, 92, 231, 0.4)';
+                        }, 1000);
+                    }
+                }, 2000);
+            }
+        }
+        
+        // Initialize slider immediately
+        initSlider();
+        
+        // Floating toolbar functionality
+        const toolbar = document.querySelector('.floating-toolbar');
+        const expandBtn = document.getElementById('expand-toolbar');
+        const collapseBtn = document.getElementById('collapse-toolbar');
+        const toolbarContent = document.getElementById('toolbar-content');
+        const toolbarHeader = document.querySelector('.toolbar-header');
+        
+        if (toolbar && expandBtn && collapseBtn && toolbarHeader) {
+            // Toggle toolbar expansion
+            expandBtn.addEventListener('click', function() {
+                toolbar.classList.add('large');
+                toolbarContent.style.display = 'block';
+                expandBtn.style.display = 'none';
+                collapseBtn.style.display = 'block';
+            });
+            
+            collapseBtn.addEventListener('click', function() {
+                toolbar.classList.remove('large');
+                toolbarContent.style.display = 'none';
+                collapseBtn.style.display = 'none';
+                expandBtn.style.display = 'block';
+            });
+            
+            // Make toolbar draggable
+            let isDragging = false;
+            let offsetX, offsetY;
+            
+            toolbarHeader.addEventListener('mousedown', function(e) {
+                isDragging = true;
+                toolbar.classList.add('dragging');
+                offsetX = e.clientX - toolbar.getBoundingClientRect().left;
+                offsetY = e.clientY - toolbar.getBoundingClientRect().top;
+            });
+            
+            document.addEventListener('mousemove', function(e) {
+                if (!isDragging) return;
+                
+                const x = e.clientX - offsetX;
+                const y = e.clientY - offsetY;
+                
+                // Keep toolbar within viewport
+                const maxX = window.innerWidth - toolbar.offsetWidth;
+                const maxY = window.innerHeight - toolbar.offsetHeight;
+                
+                const boundedX = Math.max(0, Math.min(maxX, x));
+                const boundedY = Math.max(0, Math.min(maxY, y));
+                
+                toolbar.style.left = boundedX + 'px';
+                toolbar.style.top = boundedY + 'px';
+                toolbar.style.right = 'auto';
+            });
+            
+            document.addEventListener('mouseup', function() {
+                isDragging = false;
+                toolbar.classList.remove('dragging');
+            });
+        }
+        
+        // Image editing controls
+        const brightnessSlider = document.getElementById('brightness');
+        const resetBtn = document.getElementById('reset-image');
+        const enhancedImages = document.querySelectorAll('.slider-image.enhanced');
+        
+        if (brightnessSlider && resetBtn && enhancedImages.length > 0) {
+            let filters = {
+                brightness: 100,
+                contrast: 100,
+                saturation: 100,
+                rotate: 0,
+                flipH: false,
+                flipV: false
+            };
+            
+            function updateFilters() {
+                let filterString = `brightness(${filters.brightness}%) contrast(${filters.contrast}%) saturate(${filters.saturation}%)`;
+                let transformString = `rotate(${filters.rotate}deg)`;
+                
+                if (filters.flipH) transformString += ' scaleX(-1)';
+                if (filters.flipV) transformString += ' scaleY(-1)';
+                
+                enhancedImages.forEach(img => {
+                    img.style.filter = filterString;
+                    img.style.transform = transformString;
+                });
+                
+                // Store current filters in session storage for persistence
+                sessionStorage.setItem('imageFilters', JSON.stringify(filters));
+            }
+            
+            // Check if we have stored filters
+            const storedFilters = sessionStorage.getItem('imageFilters');
+            if (storedFilters) {
+                try {
+                    filters = JSON.parse(storedFilters);
+                    brightnessSlider.value = filters.brightness;
+                    updateFilters();
+                } catch (e) {
+                    console.error('Error parsing stored filters:', e);
+                }
+            }
+            
+            brightnessSlider.addEventListener('input', function() {
+                filters.brightness = this.value;
+                updateFilters();
+            });
+            
+            // Filter buttons
+            const filterBtns = document.querySelectorAll('.editor-control[data-filter]');
+            filterBtns.forEach(btn => {
+                btn.addEventListener('click', function() {
+                    const filter = this.getAttribute('data-filter');
+                    const value = parseInt(this.getAttribute('data-value'));
+                    
+                    if (filter && !isNaN(value)) {
+                        filters[filter] = value;
+                        updateFilters();
+                        
+                        // Visual feedback
+                        this.classList.add('active');
+                        setTimeout(() => {
+                            this.classList.remove('active');
+                        }, 300);
+                    }
+                });
+            });
+            
+            // Rotation and flip controls
+            const actionBtns = document.querySelectorAll('.editor-control[data-action]');
+            actionBtns.forEach(btn => {
+                btn.addEventListener('click', function() {
+                    const action = this.getAttribute('data-action');
+                    const value = this.getAttribute('data-value');
+                    
+                    if (action === 'rotate') {
+                        const degrees = parseInt(value);
+                        if (!isNaN(degrees)) {
+                            filters.rotate = (filters.rotate + degrees) % 360;
+                        }
+                    } else if (action === 'flip') {
+                        if (value === 'horizontal') {
+                            filters.flipH = !filters.flipH;
+                        } else if (value === 'vertical') {
+                            filters.flipV = !filters.flipV;
+                        }
+                    }
+                    
+                    updateFilters();
+                    
+                    // Visual feedback
+                    this.classList.add('active');
+                    setTimeout(() => {
+                        this.classList.remove('active');
+                    }, 300);
+                });
+            });
+            
+            // Reset button
+            resetBtn.addEventListener('click', function() {
+                filters = {
+                    brightness: 100,
+                    contrast: 100,
+                    saturation: 100,
+                    rotate: 0,
+                    flipH: false,
+                    flipV: false
+                };
+                brightnessSlider.value = 100;
+                updateFilters();
+                
+                // Visual feedback
+                this.classList.add('active');
+                setTimeout(() => {
+                    this.classList.remove('active');
+                }, 300);
+                
+                // Show success message
+                showStatus('Image reset to original state', 'success');
+            });
+        }
+        
+        // Download enhanced image
+        const downloadBtn = document.querySelector('.action-buttons a[download]');
+        if (downloadBtn) {
+            downloadBtn.addEventListener('click', function() {
+                // Show success message
+                showStatus('Image downloaded successfully!', 'success');
+            });
+        }
+        
+        // Status indicator with improved animation
+        function showStatus(message, type) {
+            const statusIndicator = document.createElement('div');
+            statusIndicator.className = `status-indicator ${type}`;
+            statusIndicator.textContent = message;
+            statusIndicator.style.transform = 'translate(-50%, 20px)';
+            statusIndicator.style.opacity = '0';
+            document.body.appendChild(statusIndicator);
+            
+            // Show the indicator with animation
+            setTimeout(() => {
+                statusIndicator.style.display = 'block';
+                statusIndicator.style.transition = 'all 0.4s cubic-bezier(0.175, 0.885, 0.32, 1.275)';
+                statusIndicator.style.transform = 'translate(-50%, 0)';
+                statusIndicator.style.opacity = '1';
+            }, 100);
+            
+            // Hide and remove after 3 seconds
+            setTimeout(() => {
+                statusIndicator.style.transform = 'translate(-50%, -20px)';
+                statusIndicator.style.opacity = '0';
+                setTimeout(() => {
+                    document.body.removeChild(statusIndicator);
+                }, 400);
+            }, 3000);
+        }
+        
+        // Add page entrance animations
+        function animateElements() {
+            const elements = [
+                '.image-comparison-container',
+                '.caption-container',
+                '.action-buttons'
+            ];
+            
+            elements.forEach((selector, index) => {
+                const element = document.querySelector(selector);
+                if (element) {
+                    element.style.opacity = '0';
+                    element.style.transform = 'translateY(30px)';
+                    element.style.transition = 'opacity 0.6s ease, transform 0.6s ease';
+                    
+                    setTimeout(() => {
+                        element.style.opacity = '1';
+                        element.style.transform = 'translateY(0)';
+                    }, 200 + (index * 150));
+                }
+            });
+        }
+        
+        // Run animations
+        animateElements();
+    });
+</script>
+{% endblock %}
+
+{% block extra_css %}
+<style>
+    :root {
+        --accent-color: #6c5ce7;
+        --accent-color-light: rgba(108, 92, 231, 0.2);
+        --accent-color-medium: rgba(108, 92, 231, 0.5);
+        --accent-color-dark: rgba(108, 92, 231, 0.8);
+    }
+    
+    .results-container {
+        position: relative;
+        padding: 2rem;
+        animation: fadeIn 0.6s ease-out;
+    }
+    
+    @keyframes fadeIn {
+        from { opacity: 0; transform: translateY(20px); }
+        to { opacity: 1; transform: translateY(0); }
+    }
+    
+    /* Floating Toolbar Styles */
+    .floating-toolbar {
+        position: fixed;
+        top: 80px;
+        right: 20px;
+        background-color: #6c5ce7;
+        border-radius: 12px;
+        box-shadow: 0 8px 20px rgba(108, 92, 231, 0.3);
+        padding: 0;
+        z-index: 100;
+        width: auto;
+        transition: all 0.4s cubic-bezier(0.165, 0.84, 0.44, 1);
+        overflow: hidden;
+        color: white;
+        backdrop-filter: blur(10px);
+    }
+    
+    .floating-toolbar.collapsed {
+        width: auto;
+        height: auto;
+    }
+    
+    .floating-toolbar.dragging {
+        opacity: 0.9;
+        cursor: grabbing;
+        transform: scale(1.02);
+    }
+    
+    .floating-toolbar.large {
+        width: 350px;
+        box-shadow: 0 12px 28px rgba(108, 92, 231, 0.4);
+    }
+    
+    .toolbar-header {
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        padding: 0.75rem 1.25rem;
+        background-color: #6c5ce7;
+        color: white;
+        cursor: grab;
+        border-radius: 12px;
+    }
+    
+    .toolbar-header h3 {
+        margin: 0;
+        font-size: 1.1rem;
+        font-weight: 600;
+    }
+    
+    .toolbar-btn {
+        background: none;
+        border: none;
+        color: white;
+        cursor: pointer;
+        padding: 0.25rem;
+        margin-left: 0.5rem;
+        border-radius: 4px;
+        transition: background-color 0.2s;
+        width: 30px;
+        height: 30px;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+    }
+    
+    .toolbar-btn:hover {
+        background-color: rgba(255, 255, 255, 0.2);
+    }
+    
+    .toolbar-content {
+        padding: 1.25rem;
+        background-color: #f8f9fa;
+        color: #333;
+        border-radius: 0 0 12px 12px;
+    }
+    
+    .toolbar-section {
+        margin-bottom: 1.25rem;
+    }
+    
+    .toolbar-section:last-child {
+        margin-bottom: 0;
+    }
+    
+    .toolbar-section h4 {
+        margin-top: 0;
+        margin-bottom: 0.75rem;
+        font-size: 1rem;
+        color: #333;
+        font-weight: 600;
+    }
+    
+    .toolbar-controls {
+        display: flex;
+        flex-wrap: wrap;
+        gap: 0.5rem;
+    }
+    
+    .editor-control {
+        padding: 0.4rem 0.8rem;
+        font-size: 0.85rem;
+        border-radius: 6px;
+        border: 1px solid #ddd;
+        background-color: white;
+        color: #333;
+        transition: all 0.2s;
+    }
+    
+    .editor-control:hover {
+        background-color: #f0f0f0;
+        border-color: #ccc;
+    }
+    
+    /* Side-by-side Comparison Styles */
+    .image-comparison-container {
+        margin: 2rem 0;
+        padding: 1.5rem;
+        background-color: #f8f9fa;
+        border-radius: 12px;
+        box-shadow: 0 4px 12px rgba(0, 0, 0, 0.05);
+    }
+    
+    .section-subtitle {
+        text-align: center;
+        margin-bottom: 1.5rem;
+        color: #666;
+        font-size: 1.1rem;
+    }
+    
+    .comparison-controls {
+        display: flex;
+        justify-content: center;
+        margin-bottom: 2rem;
+        gap: 0.5rem;
+    }
+    
+    .toggle-view-btn {
+        padding: 0.8rem 1.5rem;
+        background-color: white;
+        border: 1px solid #ddd;
+        border-radius: 8px;
+        font-weight: 500;
+        font-size: 1.1rem;
+        transition: all 0.3s cubic-bezier(0.25, 0.8, 0.25, 1);
+        box-shadow: 0 1px 3px rgba(0, 0, 0, 0.1);
+    }
+    
+    .toggle-view-btn:hover {
+        background-color: #f0f0f0;
+        transform: translateY(-2px);
+        box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+    }
+    
+    .toggle-view-btn.active {
+        background-color: #6c5ce7;
+        color: white;
+        border-color: #6c5ce7;
+        transform: scale(1.05);
+        box-shadow: 0 4px 12px rgba(108, 92, 231, 0.3);
+    }
+    
+    .comparison-layout {
+        display: flex;
+        justify-content: center;
+        gap: 2rem;
+        margin-bottom: 2rem;
+    }
+    
+    .comparison-box {
+        flex: 0 0 45%;
+        max-width: 500px;
+        position: relative;
+        background-color: white;
+        border-radius: 12px;
+        box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
+        padding: 0;
+        overflow: hidden;
+    }
+    
+    .label-badge {
+        position: absolute;
+        top: 15px;
+        left: 15px;
+        background-color: #e74c3c;
+        color: white;
+        padding: 5px 15px;
+        border-radius: 4px;
+        font-weight: 600;
+        font-size: 0.9rem;
+        z-index: 5;
+    }
+    
+    .label-badge.enhanced {
+        background-color: #2ecc71;
+    }
+    
+    .image-title {
+        text-align: center;
+        padding: 15px 0;
+        margin: 0;
+        font-size: 1.2rem;
+        font-weight: 600;
+        color: #333;
+        border-bottom: 3px solid #6c5ce7;
+        width: 60%;
+        margin: 0 auto 15px;
+    }
+    
+    .image-box {
+        padding: 0;
+        width: 100%;
+        height: 300px;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        overflow: hidden;
+    }
+    
+    .comparison-image {
+        max-width: 100%;
+        max-height: 100%;
+        object-fit: contain;
+    }
+    
+    /* Slider Comparison Styles */
+    .slider-comparison {
+        max-width: 800px;
+        margin: 0 auto;
+        padding: 1.5rem;
+        background-color: white;
+        border-radius: 12px;
+        box-shadow: 0 10px 30px rgba(0, 0, 0, 0.08);
+        transition: transform 0.3s ease, box-shadow 0.3s ease;
+    }
+    
+    .slider-comparison:hover {
+        transform: translateY(-5px);
+        box-shadow: 0 15px 35px rgba(0, 0, 0, 0.12);
+    }
+    
+    .comparison-title {
+        text-align: center;
+        color: #333;
+        margin-bottom: 1.5rem;
+        font-weight: 600;
+        position: relative;
+        padding-bottom: 0.75rem;
+    }
+    
+    .comparison-title:after {
+        content: '';
+        position: absolute;
+        bottom: 0;
+        left: 50%;
+        transform: translateX(-50%);
+        width: 80px;
+        height: 3px;
+        background: linear-gradient(90deg, #6c5ce7, #a29bfe);
+        border-radius: 3px;
+    }
+    
+    .comparison-wrapper {
+        position: relative;
+        overflow: hidden;
+        width: 100%;
+        min-height: 400px;
+        border-radius: 12px;
+        box-shadow: 0 8px 20px rgba(0, 0, 0, 0.1);
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        padding: 10px;
+        background: linear-gradient(135deg, #f5f7fa 0%, #e4e8f0 100%);
+    }
+    
+    .slider-image {
+        max-width: 100%;
+        max-height: 100%;
+        width: auto;
+        height: auto;
+        object-fit: contain;
+    }
+    
+    .slider-image.enhanced {
+        position: absolute;
+        top: 0;
+        left: 0;
+        clip-path: inset(0 0 0 50%);
+        height: 100%;
+        width: 100%;
+        object-fit: contain;
+    }
+    
+    .comparison-slider {
+        position: absolute;
+        top: 0;
+        left: 50%;
+        width: 4px;
+        height: 100%;
+        background: linear-gradient(to bottom, #6c5ce7, #a29bfe);
+        cursor: ew-resize;
+        transition: background 0.3s ease;
+    }
+    
+    .slider-handle {
+        position: absolute;
+        top: 50%;
+        left: 50%;
+        transform: translate(-50%, -50%);
+        width: 40px;
+        height: 40px;
+        border-radius: 50%;
+        background: linear-gradient(135deg, #6c5ce7, #a29bfe);
+        box-shadow: 0 0 15px rgba(108, 92, 231, 0.5);
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        transition: transform 0.2s ease, box-shadow 0.2s ease;
+    }
+    
+    .slider-handle:hover {
+        transform: translate(-50%, -50%) scale(1.1);
+        box-shadow: 0 0 20px rgba(108, 92, 231, 0.7);
+    }
+    
+    .slider-handle::before,
+    .slider-handle::after {
+        content: '';
+        position: absolute;
+        background-color: white;
+    }
+    
+    .slider-handle::before {
+        width: 2px;
+        height: 16px;
+        left: 50%;
+        transform: translateX(-50%);
+    }
+    
+    .slider-handle::after {
+        width: 16px;
+        height: 2px;
+        top: 50%;
+        transform: translateY(-50%);
+    }
+    
+    .comparison-labels {
+        display: flex;
+        justify-content: space-between;
+        margin-top: 0.75rem;
+        font-weight: 600;
+        color: #333;
+    }
+    
+    /* Caption Styles with enhanced effects */
+    .caption-container {
+        background-color: white;
+        border-radius: 12px;
+        padding: 1.5rem;
+        margin: 2rem 0;
+        box-shadow: 0 10px 30px rgba(0, 0, 0, 0.05);
+        text-align: center;
+        transition: transform 0.3s ease, box-shadow 0.3s ease;
+        animation: slideUp 0.8s ease-out forwards;
+        animation-delay: 0.3s;
+        opacity: 0;
+        position: relative;
+        overflow: hidden;
+    }
+    
+    .caption-container:before {
+        content: '';
+        position: absolute;
+        top: 0;
+        left: 0;
+        width: 100%;
+        height: 4px;
+        background-color: #6c5ce7;
+        transform: scaleX(0);
+        transform-origin: left;
+        transition: transform 0.6s ease;
+    }
+    
+    .caption-container:hover:before {
+        transform: scaleX(1);
+    }
+    
+    .caption-container:after {
+        content: '';
+        position: absolute;
+        bottom: 0;
+        right: 0;
+        width: 30%;
+        height: 2px;
+        background-color: #6c5ce7;
+        opacity: 0.3;
+    }
+    
+    .caption-title {
+        color: #6c5ce7;
+        margin-top: 0;
+        margin-bottom: 1rem;
+        font-size: 1.3rem;
+        position: relative;
+        display: inline-block;
+    }
+    
+    .caption-title:after {
+        content: '';
+        position: absolute;
+        bottom: -5px;
+        left: 0;
+        width: 100%;
+        height: 2px;
+        background-color: #6c5ce7;
+        transform-origin: center;
+        transition: transform 0.3s ease;
+    }
+    
+    .caption-container:hover .caption-title:after {
+        transform: scaleX(1.2);
+    }
+    
+    .caption-text {
+        color: #555;
+        font-size: 1.1rem;
+        margin: 0;
+        font-style: italic;
+        position: relative;
+        padding: 0.5rem 0;
+        transition: transform 0.3s ease;
+    }
+    
+    .caption-container:hover .caption-text {
+        transform: translateY(-2px);
+    }
+    
+    /* Action Buttons */
+    .action-buttons {
+        display: flex;
+        flex-wrap: wrap;
+        gap: 1rem;
+        justify-content: center;
+        margin-top: 2rem;
+        animation: fadeIn 0.8s ease-out forwards;
+        animation-delay: 0.5s;
+        opacity: 0;
+    }
+    
+    .action-buttons .btn {
+        padding: 0.85rem 1.75rem;
+        border-radius: 10px;
+        font-weight: 600;
+        transition: all 0.3s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+        min-width: 200px;
+        text-align: center;
+        position: relative;
+        overflow: hidden;
+        z-index: 1;
+        box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+    }
+    
+    .action-buttons .primary-btn {
+        background-color: #6c5ce7;
+        color: white;
+        border: none;
+    }
+    
+    .action-buttons .primary-btn:before {
+        content: '';
+        position: absolute;
+        top: 0;
+        left: 0;
+        width: 100%;
+        height: 100%;
+        background-color: rgba(255, 255, 255, 0.1);
+        transform: scaleX(0);
+        transform-origin: left;
+        transition: transform 0.4s ease;
+        z-index: -1;
+    }
+    
+    .action-buttons .primary-btn:hover {
+        transform: translateY(-5px);
+        box-shadow: 0 7px 14px rgba(0, 0, 0, 0.15);
+    }
+    
+    .action-buttons .primary-btn:hover:before {
+        transform: scaleX(1);
+    }
+    
+    .action-buttons .primary-btn:active {
+        transform: translateY(-2px);
+        box-shadow: 0 4px 8px rgba(0, 0, 0, 0.2);
+    }
+    
+    /* Responsive adjustments */
+    @media (max-width: 768px) {
+        .comparison-layout {
+            flex-direction: column;
+            align-items: center;
+        }
+        
+        .comparison-box {
+            flex: 0 0 100%;
+            max-width: 100%;
+            margin-bottom: 1.5rem;
+        }
+        
+        .floating-toolbar {
+            width: auto;
+            top: 70px;
+            right: 10px;
+        }
+        
+        .action-buttons {
+            flex-direction: column;
+            align-items: center;
+        }
+        
+        .action-buttons .btn {
+            width: 100%;
+        }
+    }
+    
+    /* Add these new CSS classes for view transitions */
+    #side-by-side-view, #slider-view {
+        transition: opacity 0.4s ease, transform 0.4s ease;
+    }
+    
+    .visible {
+        opacity: 1;
+        transform: translateY(0);
+    }
+    
+    .hidden {
+        opacity: 0;
+        transform: translateY(10px);
+        position: absolute;
+        width: 100%;
+    }
+    
+    /* Editor control active state */
+    .editor-control.active {
+        background-color: #6c5ce7;
+        color: white;
+        border-color: #6c5ce7;
+        transform: scale(0.95);
+        transition: all 0.2s ease;
+    }
+    
+    /* Status indicator styles */
+    .status-indicator {
+        position: fixed;
+        bottom: 20px;
+        left: 50%;
+        transform: translateX(-50%);
+        padding: 12px 24px;
+        border-radius: 8px;
+        color: white;
+        font-weight: 600;
+        z-index: 1000;
+        display: none;
+        box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
+    }
+    
+    .status-indicator.success {
+        background-color: #2ecc71;
+    }
+    
+    .status-indicator.error {
+        background-color: #e74c3c;
+    }
+    
+    /* Ensure the enhanced image maintains proper sizing when transformed */
+    .slider-image.enhanced {
+        transform-origin: center;
+        transition: filter 0.3s ease, transform 0.3s ease;
+    }
+    
+    @keyframes slideUp {
+        from { opacity: 0; transform: translateY(30px); }
+        to { opacity: 1; transform: translateY(0); }
+    }
+</style>
+{% endblock %}

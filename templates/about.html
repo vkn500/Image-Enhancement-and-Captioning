@@ -1,0 +1,292 @@
+{% extends 'base.html' %}
+
+{% block title %}About - Image Enhancer{% endblock %}
+
+{% block extra_css %}
+<style>
+    .about-page {
+        padding: 40px 0;
+    }
+    
+    .about-section {
+        margin: 60px 0;
+        display: flex;
+        align-items: center;
+        gap: 40px;
+    }
+    
+    .about-section.reverse {
+        flex-direction: row-reverse;
+    }
+    
+    .about-content {
+        flex: 1;
+    }
+    
+    .about-list {
+        list-style: none;
+        padding: 0;
+        margin: 20px 0;
+    }
+    
+    .about-list li {
+        margin-bottom: 10px;
+        display: flex;
+        align-items: center;
+    }
+    
+    .about-list li i {
+        color: var(--primary-color);
+        margin-right: 10px;
+    }
+    
+    .cta-box {
+        background: linear-gradient(135deg, var(--primary-color) 0%, var(--secondary-color) 100%);
+        padding: 40px;
+        border-radius: 15px;
+        text-align: center;
+        color: white;
+        margin: 60px 0 20px;
+    }
+    
+    .cta-box h2 {
+        margin-bottom: 15px;
+    }
+    
+    .cta-box p {
+        margin-bottom: 25px;
+        opacity: 0.9;
+    }
+    
+    .cta-buttons {
+        display: flex;
+        justify-content: center;
+        gap: 15px;
+    }
+    
+    .cta-buttons .btn {
+        min-width: 150px;
+    }
+    
+    /* FAQ Section Styles */
+    .faq-section {
+        margin: 60px 0;
+    }
+    
+    .faq-container {
+        max-width: 800px;
+        margin: 40px auto;
+    }
+    
+    .faq-item {
+        margin-bottom: 15px;
+        border-radius: 10px;
+        background-color: var(--card-bg);
+        box-shadow: 0 4px 10px rgba(0, 0, 0, 0.05);
+        overflow: hidden;
+        transition: all 0.3s ease;
+    }
+    
+    .faq-question {
+        padding: 20px 25px;
+        font-weight: 600;
+        font-size: 1.1rem;
+        color: var(--text-color);
+        cursor: pointer;
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        transition: background-color 0.3s ease;
+    }
+    
+    .faq-question:hover {
+        background-color: rgba(108, 99, 255, 0.05);
+    }
+    
+    .faq-question i {
+        transition: transform 0.3s ease;
+        font-size: 0.9rem;
+        color: var(--primary-color);
+    }
+    
+    .faq-answer {
+        max-height: 0;
+        overflow: hidden;
+        transition: max-height 0.3s ease, padding 0.3s ease;
+        padding: 0 25px;
+        color: var(--light-text);
+        line-height: 1.6;
+    }
+    
+    .faq-item.active .faq-question {
+        color: var(--primary-color);
+    }
+    
+    .faq-item.active .faq-question i {
+        transform: rotate(180deg);
+    }
+    
+    .faq-item.active .faq-answer {
+        max-height: 500px;
+        padding: 0 25px 20px;
+    }
+    
+    .faq-item.active {
+        box-shadow: 0 8px 20px rgba(108, 99, 255, 0.1);
+    }
+    
+    @media (max-width: 768px) {
+        .about-section {
+            flex-direction: column;
+            text-align: center;
+        }
+        
+        .about-section.reverse {
+            flex-direction: column;
+        }
+        
+        .about-list li {
+            justify-content: center;
+        }
+        
+        .cta-buttons {
+            flex-direction: column;
+            align-items: center;
+        }
+    }
+</style>
+{% endblock %}
+
+{% block content %}
+<div class="container">
+    <div class="about-page">
+        <h1 class="section-title">About Image Enhancer</h1>
+        <p class="section-subtitle">Learn more about our mission and technology</p>
+        
+        <div class="about-section">
+            <div class="about-content">
+                <h2>Our Mission</h2>
+                <p>At Image Enhancer, we believe that everyone deserves access to professional-quality images. Our mission is to democratize image enhancement technology by making it accessible, easy to use, and affordable for everyone.</p>
+                <p>Whether you're a professional photographer looking to streamline your workflow, a social media enthusiast wanting to improve your posts, or just someone who wants to restore old family photos, our AI-powered tools are designed to help you achieve stunning results with minimal effort.</p>
+            </div>
+        </div>
+        
+        <div class="about-section reverse">
+            <div class="about-content">
+                <h2>Our Technology</h2>
+                <p>Image Enhancer uses cutting-edge artificial intelligence and machine learning algorithms to analyze and improve your images. Our technology can:</p>
+                <ul class="about-list">
+                    <li><i class="fas fa-check"></i> Enhance image resolution and clarity</li>
+                    <li><i class="fas fa-check"></i> Improve lighting and color balance</li>
+                    <li><i class="fas fa-check"></i> Remove noise and artifacts</li>
+                    <li><i class="fas fa-check"></i> Sharpen details and textures</li>
+                    <li><i class="fas fa-check"></i> Generate accurate image descriptions</li>
+                </ul>
+                <p>Our models are trained on millions of images and continuously improved to deliver the best possible results.</p>
+            </div>
+        </div>
+        
+        <div class="about-section">
+            <div class="about-content">
+                <h2>Our Team</h2>
+                <p>We are a passionate team of AI researchers, software engineers, and design enthusiasts committed to pushing the boundaries of what's possible with image enhancement technology.</p>
+                <p>Founded in 2023, our team combines expertise in computer vision, deep learning, and user experience design to create tools that are not only powerful but also intuitive and enjoyable to use.</p>
+            </div>
+        </div>
+        
+        <!-- FAQ Section -->
+        <div class="faq-section">
+            <h2 class="section-title">Frequently Asked Questions</h2>
+            <div class="faq-container">
+                <div class="faq-item">
+                    <div class="faq-question">
+                        <span>How does the image enhancement technology work?</span>
+                        <i class="fas fa-chevron-down"></i>
+                    </div>
+                    <div class="faq-answer">
+                        <p>Our image enhancement technology uses deep learning neural networks trained on millions of images. The AI analyzes your image, identifies areas that need improvement, and applies precise enhancements to increase resolution, remove noise, improve lighting, and sharpen details while maintaining the natural look of the image.</p>
+                    </div>
+                </div>
+                
+                <div class="faq-item">
+                    <div class="faq-question">
+                        <span>What file formats are supported?</span>
+                        <i class="fas fa-chevron-down"></i>
+                    </div>
+                    <div class="faq-answer">
+                        <p>Image Enhancer supports all common image formats including JPG, JPEG, PNG, and WEBP. We're constantly working to add support for more formats based on user feedback.</p>
+                    </div>
+                </div>
+                
+                <div class="faq-item">
+                    <div class="faq-question">
+                        <span>Is there a limit to how many images I can enhance?</span>
+                        <i class="fas fa-chevron-down"></i>
+                    </div>
+                    <div class="faq-answer">
+                        <p>Free accounts can enhance up to 5 images per day. Premium subscribers enjoy unlimited image enhancements, priority processing, and access to advanced enhancement features.</p>
+                    </div>
+                </div>
+                
+                <div class="faq-item">
+                    <div class="faq-question">
+                        <span>How is my data and privacy protected?</span>
+                        <i class="fas fa-chevron-down"></i>
+                    </div>
+                    <div class="faq-answer">
+                        <p>We take your privacy seriously. Your images are processed securely and are never shared with third parties. You can choose whether to store your enhancement history or delete images immediately after processing. For more details, please review our Privacy Policy.</p>
+                    </div>
+                </div>
+                
+                <div class="faq-item">
+                    <div class="faq-question">
+                        <span>Can I use the enhanced images commercially?</span>
+                        <i class="fas fa-chevron-down"></i>
+                    </div>
+                    <div class="faq-answer">
+                        <p>Yes, you retain all rights to your original and enhanced images. You're free to use the enhanced images for personal or commercial purposes, as long as you have the appropriate rights to the original image.</p>
+                    </div>
+                </div>
+            </div>
+        </div>
+        
+        <div class="cta-box">
+            <h2>Ready to enhance your images?</h2>
+            <p>Join thousands of users who are already using Image Enhancer to transform their photos.</p>
+            <div class="cta-buttons">
+                {% if current_user.is_authenticated %}
+                    <a href="{{ url_for('dashboard') }}" class="btn">Go to Dashboard</a>
+                {% else %}
+                    <a href="{{ url_for('signup') }}" class="btn">Sign Up Now</a>
+                    <a href="{{ url_for('login') }}" class="btn btn-secondary">Login</a>
+                {% endif %}
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}
+
+{% block extra_js %}
+<script>
+    document.addEventListener('DOMContentLoaded', function() {
+        // FAQ accordion functionality
+        const faqItems = document.querySelectorAll('.faq-item');
+        
+        faqItems.forEach(item => {
+            const question = item.querySelector('.faq-question');
+            
+            question.addEventListener('click', () => {
+                // Close all other items
+                faqItems.forEach(otherItem => {
+                    if (otherItem !== item && otherItem.classList.contains('active')) {
+                        otherItem.classList.remove('active');
+                    }
+                });
+                
+                // Toggle current item
+                item.classList.toggle('active');
+            });
+        });
+    });
+</script>
+{% endblock %} 

@@ -1,0 +1,294 @@
+{% extends 'base.html' %}
+
+{% block title %}History - Image Enhancer{% endblock %}
+
+{% block content %}
+<div class="container">
+    <div class="history-page">
+        <h1 class="section-title">Your Enhancement History</h1>
+        <p class="section-subtitle">View your past image enhancements and results</p>
+        
+        <div class="history-filters">
+            <div class="filter-group">
+                <label for="filter-type">Filter by Type:</label>
+                <select id="filter-type" class="form-control">
+                    <option value="all">All</option>
+                    <option value="upload">Uploaded</option>
+                    <option value="camera">Camera</option>
+                </select>
+            </div>
+            
+            <div class="filter-group">
+                <label for="filter-date">Filter by Date:</label>
+                <select id="filter-date" class="form-control">
+                    <option value="all">All Time</option>
+                    <option value="today">Today</option>
+                    <option value="week">This Week</option>
+                    <option value="month">This Month</option>
+                </select>
+            </div>
+            
+            <div class="filter-group">
+                <label for="sort-by">Sort by:</label>
+                <select id="sort-by" class="form-control">
+                    <option value="newest">Newest First</option>
+                    <option value="oldest">Oldest First</option>
+                    <option value="accuracy">Highest Accuracy</option>
+                </select>
+            </div>
+        </div>
+        
+        <div class="history-list">
+            {% if history %}
+                {% for item in history %}
+                <div class="history-item" data-type="{{ item.source_type }}">
+                    <div class="history-item-header">
+                        <div class="history-date">
+                            <i class="far fa-calendar-alt"></i> {{ item.timestamp }}
+                        </div>
+                        <div class="history-type">
+                            {% if item.source_type == 'upload' %}
+                                <span class="badge badge-upload"><i class="fas fa-upload"></i> Uploaded</span>
+                            {% else %}
+                                <span class="badge badge-camera"><i class="fas fa-camera"></i> Camera</span>
+                            {% endif %}
+                        </div>
+                    </div>
+                    
+                    <div class="history-item-content">
+                        <div class="history-images">
+                            <div class="history-image">
+                                <img src="{{ url_for('static', filename='uploads/' + item.original_image) }}" alt="Original Image">
+                                <p>Original</p>
+                            </div>
+                            <div class="history-arrow">
+                                <i class="fas fa-arrow-right"></i>
+                            </div>
+                            <div class="history-image">
+                                <img src="{{ url_for('static', filename='enhanced/' + item.enhanced_image) }}" alt="Enhanced Image">
+                                <p>Enhanced</p>
+                            </div>
+                        </div>
+                        
+                        <div class="history-details">
+                            <div class="detail-item">
+                                <span class="detail-label"><i class="fas fa-file-image"></i> Format:</span>
+                                <span class="detail-value">{{ item.image_format }}</span>
+                            </div>
+                            <div class="detail-item">
+                                <span class="detail-label"><i class="fas fa-weight"></i> Size:</span>
+                                <span class="detail-value">{{ item.image_size }}</span>
+                            </div>
+                            <div class="detail-item">
+                                <span class="detail-label"><i class="fas fa-chart-line"></i> Accuracy:</span>
+                                <span class="detail-value accuracy-badge">{{ item.enhancement_accuracy }}</span>
+                            </div>
+                        </div>
+                        
+                        {% if item.caption %}
+                        <div class="history-caption">
+                            <span class="caption-label"><i class="fas fa-quote-left"></i> Caption:</span>
+                            <p class="caption-text">{{ item.caption }}</p>
+                        </div>
+                        {% endif %}
+                    </div>
+                    
+                    <div class="history-item-actions">
+                        <a href="{{ url_for('download', filename=item.enhanced_image) }}" class="btn btn-sm" download>
+                            <i class="fas fa-download"></i> Download
+                        </a>
+                        <button class="btn btn-sm btn-secondary view-details-btn">
+                            <i class="fas fa-eye"></i> View Details
+                        </button>
+                        <button class="btn btn-sm btn-danger delete-btn" data-id="{{ loop.index0 }}">
+                            <i class="fas fa-trash-alt"></i> Delete
+                        </button>
+                    </div>
+                </div>
+                {% endfor %}
+            {% else %}
+                <div class="empty-history">
+                    <div class="empty-icon">
+                        <i class="fas fa-history"></i>
+                    </div>
+                    <h3>No History Found</h3>
+                    <p>You haven't enhanced any images yet. Start by uploading an image or taking a photo.</p>
+                    <div class="empty-actions">
+                        <a href="{{ url_for('upload_page') }}" class="btn">Upload Image</a>
+                        <a href="{{ url_for('camera_page') }}" class="btn btn-secondary">Take Photo</a>
+                    </div>
+                </div>
+            {% endif %}
+        </div>
+        
+        {% if history %}
+        <div class="pagination">
+            <button class="pagination-btn" disabled><i class="fas fa-chevron-left"></i></button>
+            <span class="pagination-info">Page 1 of 1</span>
+            <button class="pagination-btn" disabled><i class="fas fa-chevron-right"></i></button>
+        </div>
+        
+        <div class="history-actions">
+            <button class="btn btn-danger" id="clear-history-btn">
+                <i class="fas fa-trash-alt"></i> Clear All History
+            </button>
+            <button class="btn btn-secondary" id="export-history-btn">
+                <i class="fas fa-file-export"></i> Export History
+            </button>
+        </div>
+        {% endif %}
+    </div>
+</div>
+
+<!-- Delete Confirmation Modal -->
+<div class="modal" id="delete-modal">
+    <div class="modal-content">
+        <div class="modal-header">
+            <h3>Confirm Deletion</h3>
+            <span class="close-modal">&times;</span>
+        </div>
+        <div class="modal-body">
+            <p>Are you sure you want to delete this item from your history? This action cannot be undone.</p>
+        </div>
+        <div class="modal-footer">
+            <button class="btn btn-secondary" id="cancel-delete-btn">Cancel</button>
+            <button class="btn btn-danger" id="confirm-delete-btn">Delete</button>
+        </div>
+    </div>
+</div>
+
+<!-- Clear All Confirmation Modal -->
+<div class="modal" id="clear-all-modal">
+    <div class="modal-content">
+        <div class="modal-header">
+            <h3>Confirm Clear All</h3>
+            <span class="close-modal">&times;</span>
+        </div>
+        <div class="modal-body">
+            <p>Are you sure you want to clear your entire history? This action cannot be undone.</p>
+        </div>
+        <div class="modal-footer">
+            <button class="btn btn-secondary" id="cancel-clear-btn">Cancel</button>
+            <button class="btn btn-danger" id="confirm-clear-btn">Clear All</button>
+        </div>
+    </div>
+</div>
+{% endblock %}
+
+{% block extra_js %}
+<script>
+    document.addEventListener('DOMContentLoaded', function() {
+        // Filter functionality
+        const filterType = document.getElementById('filter-type');
+        const filterDate = document.getElementById('filter-date');
+        const sortBy = document.getElementById('sort-by');
+        const historyItems = document.querySelectorAll('.history-item');
+        
+        function applyFilters() {
+            const typeFilter = filterType.value;
+            
+            historyItems.forEach(item => {
+                const itemType = item.dataset.type;
+                
+                // Apply type filter
+                if (typeFilter === 'all' || typeFilter === itemType) {
+                    item.style.display = 'block';
+                } else {
+                    item.style.display = 'none';
+                }
+                
+                // Date filter would be implemented here with actual dates
+                // For now, we're just showing/hiding based on type
+            });
+        }
+        
+        if (filterType) filterType.addEventListener('change', applyFilters);
+        if (filterDate) filterDate.addEventListener('change', applyFilters);
+        if (sortBy) sortBy.addEventListener('change', applyFilters);
+        
+        // Delete functionality
+        const deleteButtons = document.querySelectorAll('.delete-btn');
+        const deleteModal = document.getElementById('delete-modal');
+        const confirmDeleteBtn = document.getElementById('confirm-delete-btn');
+        const cancelDeleteBtn = document.getElementById('cancel-delete-btn');
+        const closeModalButtons = document.querySelectorAll('.close-modal');
+        
+        let itemToDelete = null;
+        
+        deleteButtons.forEach(button => {
+            button.addEventListener('click', function() {
+                itemToDelete = this.dataset.id;
+                if (deleteModal) deleteModal.style.display = 'block';
+            });
+        });
+        
+        if (confirmDeleteBtn) {
+            confirmDeleteBtn.addEventListener('click', function() {
+                // Here you would send an AJAX request to delete the item
+                // For now, we'll just hide it
+                if (itemToDelete !== null) {
+                    // Create a form to submit the delete request
+                    const form = document.createElement('form');
+                    form.method = 'POST';
+                    form.action = `/delete_history_item/${itemToDelete}`;
+                    document.body.appendChild(form);
+                    form.submit();
+                    
+                    deleteModal.style.display = 'none';
+                }
+            });
+        }
+        
+        if (cancelDeleteBtn) {
+            cancelDeleteBtn.addEventListener('click', function() {
+                deleteModal.style.display = 'none';
+            });
+        }
+        
+        // Clear all functionality
+        const clearHistoryBtn = document.getElementById('clear-history-btn');
+        const clearAllModal = document.getElementById('clear-all-modal');
+        const confirmClearBtn = document.getElementById('confirm-clear-btn');
+        const cancelClearBtn = document.getElementById('cancel-clear-btn');
+        
+        if (clearHistoryBtn) {
+            clearHistoryBtn.addEventListener('click', function() {
+                if (clearAllModal) clearAllModal.style.display = 'block';
+            });
+        }
+        
+        if (confirmClearBtn) {
+            confirmClearBtn.addEventListener('click', function() {
+                // Create a form to submit the clear history request
+                const form = document.createElement('form');
+                form.method = 'POST';
+                form.action = '/clear_history';
+                document.body.appendChild(form);
+                form.submit();
+                
+                clearAllModal.style.display = 'none';
+            });
+        }
+        
+        if (cancelClearBtn) {
+            cancelClearBtn.addEventListener('click', function() {
+                clearAllModal.style.display = 'none';
+            });
+        }
+        
+        // Close modals when clicking outside
+        closeModalButtons.forEach(button => {
+            button.addEventListener('click', function() {
+                const modal = this.closest('.modal');
+                if (modal) modal.style.display = 'none';
+            });
+        });
+        
+        window.addEventListener('click', function(event) {
+            if (event.target.classList.contains('modal')) {
+                event.target.style.display = 'none';
+            }
+        });
+    });
+</script>
+{% endblock %}

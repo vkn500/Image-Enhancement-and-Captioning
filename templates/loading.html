@@ -1,0 +1,84 @@
+{% extends 'base.html' %}
+
+{% block title %}Processing - Image Enhancer{% endblock %}
+
+{% block content %}
+<div class="container">
+    <div class="loading-container">
+        <h1 class="section-title">Enhancing Your Image</h1>
+        <p class="section-subtitle">Please wait while our AI works its magic...</p>
+        
+        <div class="loading-animation">
+            <div class="spinner"></div>
+        </div>
+        
+        <div class="loading-progress">
+            <div class="progress-bar">
+                <div class="progress-fill" id="progress-fill"></div>
+            </div>
+            <p class="progress-text" id="progress-text">Processing... <span id="progress-percent">0%</span></p>
+        </div>
+        
+        <div class="loading-tips">
+            <h3>Did you know?</h3>
+            <div class="tip-carousel" id="tip-carousel">
+                <p class="tip">Our AI uses advanced neural networks to enhance image details.</p>
+                <p class="tip">Image enhancement preserves the original composition while improving quality.</p>
+                <p class="tip">The enhancement process analyzes lighting, color balance, and sharpness.</p>
+                <p class="tip">You can download your enhanced images in full resolution.</p>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}
+
+{% block extra_js %}
+<script>
+    document.addEventListener('DOMContentLoaded', function() {
+        const progressFill = document.getElementById('progress-fill');
+        const progressText = document.getElementById('progress-percent');
+        const tipCarousel = document.getElementById('tip-carousel');
+        const tips = tipCarousel.querySelectorAll('.tip');
+        
+        let currentTip = 0;
+        let progress = 0;
+        
+        // Simulate progress
+        const progressInterval = setInterval(() => {
+            progress += Math.random() * 3;
+            if (progress >= 100) {
+                progress = 100;
+                clearInterval(progressInterval);
+                
+                // Redirect to results page after a short delay
+                setTimeout(() => {
+                    window.location.href = "{{ redirect_url }}";
+                }, 1000);
+            }
+            
+            progressFill.style.width = `${progress}%`;
+            progressText.textContent = `${Math.floor(progress)}%`;
+        }, 200);
+        
+        // Rotate tips
+        setInterval(() => {
+            tips[currentTip].style.opacity = 0;
+            
+            setTimeout(() => {
+                currentTip = (currentTip + 1) % tips.length;
+                tips.forEach(tip => tip.style.display = 'none');
+                tips[currentTip].style.display = 'block';
+                
+                setTimeout(() => {
+                    tips[currentTip].style.opacity = 1;
+                }, 50);
+            }, 500);
+        }, 5000);
+        
+        // Show first tip
+        tips.forEach(tip => tip.style.display = 'none');
+        tips[0].style.display = 'block';
+        tips[0].style.opacity = 1;
+    });
+</script>
+{% endblock %} 

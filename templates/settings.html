@@ -1,0 +1,455 @@
+{% extends 'base.html' %}
+
+{% block title %}Settings - Image Enhancer{% endblock %}
+
+{% block content %}
+<div class="container">
+    <div class="settings-page">
+        <h1 class="section-title">Account Settings</h1>
+        <p class="section-subtitle">Manage your account preferences and settings</p>
+        
+        <div class="settings-container">
+            <div class="settings-sidebar">
+                <div class="user-profile">
+                    <div class="profile-image">
+                        <img src="{{ url_for('static', filename='images/default-avatar.png') }}" alt="Profile Image" onerror="this.style.display='none'">
+                        <div class="change-photo">
+                            <i class="fas fa-camera"></i>
+                        </div>
+                    </div>
+                    <div class="profile-info">
+                        <h3>{{ username }}</h3>
+                        <p>{{ email }}</p>
+                    </div>
+                </div>
+                
+                <ul class="settings-nav">
+                    <li class="active" data-tab="profile">
+                        <i class="fas fa-user"></i> Profile
+                    </li>
+                    <li data-tab="appearance">
+                        <i class="fas fa-palette"></i> Appearance
+                    </li>
+                    <li data-tab="notifications">
+                        <i class="fas fa-bell"></i> Notifications
+                    </li>
+                    <li data-tab="security">
+                        <i class="fas fa-shield-alt"></i> Security
+                    </li>
+                    <li data-tab="privacy">
+                        <i class="fas fa-lock"></i> Privacy
+                    </li>
+                    <li data-tab="connected">
+                        <i class="fas fa-link"></i> Connected Accounts
+                    </li>
+                </ul>
+                
+                <div class="sidebar-actions">
+                    <a href="{{ url_for('logout') }}" class="btn btn-danger btn-block">
+                        <i class="fas fa-sign-out-alt"></i> Logout
+                    </a>
+                </div>
+            </div>
+            
+            <div class="settings-content">
+                <!-- Profile Tab -->
+                <div class="settings-tab active" id="profile-tab">
+                    <h2>Profile Settings</h2>
+                    <form action="{{ url_for('settings') }}" method="post" class="settings-form">
+                        <div class="form-group">
+                            <label for="username" class="form-label">Username</label>
+                            <input type="text" id="username" name="username" class="form-control" value="{{ username }}" required>
+                        </div>
+                        
+                        <div class="form-group">
+                            <label for="email" class="form-label">Email Address</label>
+                            <input type="email" id="email" name="email" class="form-control" value="{{ email }}" required>
+                        </div>
+                        
+                        <div class="form-group">
+                            <label for="bio" class="form-label">Bio</label>
+                            <textarea id="bio" name="bio" class="form-control" rows="3">{{ settings.bio if settings.bio else '' }}</textarea>
+                        </div>
+                        
+                        <div class="form-group">
+                            <label for="language" class="form-label">Language</label>
+                            <select id="language" name="language" class="form-control">
+                                <option value="English" {% if settings.language == 'English' %}selected{% endif %}>English</option>
+                                <option value="Spanish" {% if settings.language == 'Spanish' %}selected{% endif %}>Spanish</option>
+                                <option value="French" {% if settings.language == 'French' %}selected{% endif %}>French</option>
+                                <option value="German" {% if settings.language == 'German' %}selected{% endif %}>German</option>
+                                <option value="Chinese" {% if settings.language == 'Chinese' %}selected{% endif %}>Chinese</option>
+                                <option value="Japanese" {% if settings.language == 'Japanese' %}selected{% endif %}>Japanese</option>
+                            </select>
+                        </div>
+                        
+                        <button type="submit" class="btn">Save Changes</button>
+                    </form>
+                </div>
+                
+                <!-- Appearance Tab -->
+                <div class="settings-tab" id="appearance-tab">
+                    <h2>Appearance Settings</h2>
+                    <form action="{{ url_for('settings') }}" method="post" class="settings-form">
+                        <div class="form-group">
+                            <label class="form-label">Theme</label>
+                            <div class="theme-options">
+                                <div class="theme-option {% if not settings.dark_mode %}active{% endif %}">
+                                    <div class="theme-preview light-theme"></div>
+                                    <div class="theme-info">
+                                        <span>Light</span>
+                                        <input type="radio" name="dark_mode" value="off" {% if not settings.dark_mode %}checked{% endif %}>
+                                    </div>
+                                </div>
+                                <div class="theme-option {% if settings.dark_mode %}active{% endif %}">
+                                    <div class="theme-preview dark-theme"></div>
+                                    <div class="theme-info">
+                                        <span>Dark</span>
+                                        <input type="radio" name="dark_mode" value="on" {% if settings.dark_mode %}checked{% endif %}>
+                                    </div>
+                                </div>
+                                <div class="theme-option">
+                                    <div class="theme-preview auto-theme"></div>
+                                    <div class="theme-info">
+                                        <span>Auto</span>
+                                        <input type="radio" name="dark_mode" value="auto">
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                        
+                        <div class="form-group">
+                            <label class="form-label">Accent Color</label>
+                            <div class="color-options">
+                                <div class="color-option active" style="--color: #6c63ff;">
+                                    <input type="radio" name="accent_color" value="purple" checked>
+                                </div>
+                                <div class="color-option" style="--color: #ff6584;">
+                                    <input type="radio" name="accent_color" value="pink">
+                                </div>
+                                <div class="color-option" style="--color: #4caf50;">
+                                    <input type="radio" name="accent_color" value="green">
+                                </div>
+                                <div class="color-option" style="--color: #2196f3;">
+                                    <input type="radio" name="accent_color" value="blue">
+                                </div>
+                                <div class="color-option" style="--color: #ff9800;">
+                                    <input type="radio" name="accent_color" value="orange">
+                                </div>
+                            </div>
+                        </div>
+                        
+                        <button type="submit" class="btn">Save Changes</button>
+                    </form>
+                </div>
+                
+                <!-- Notifications Tab -->
+                <div class="settings-tab" id="notifications-tab">
+                    <h2>Notification Settings</h2>
+                    <form action="{{ url_for('settings') }}" method="post" class="settings-form">
+                        <div class="form-group form-switch">
+                            <label class="switch-label">
+                                <span>Email Notifications</span>
+                                <div class="switch">
+                                    <input type="checkbox" name="email_notifications" {% if settings.notifications %}checked{% endif %}>
+                                    <span class="slider round"></span>
+                                </div>
+                            </label>
+                            <p class="form-text">Receive email notifications about your account activity</p>
+                        </div>
+                        
+                        <div class="form-group form-switch">
+                            <label class="switch-label">
+                                <span>Processing Notifications</span>
+                                <div class="switch">
+                                    <input type="checkbox" name="processing_notifications" checked>
+                                    <span class="slider round"></span>
+                                </div>
+                            </label>
+                            <p class="form-text">Receive notifications when your image processing is complete</p>
+                        </div>
+                        
+                        <div class="form-group form-switch">
+                            <label class="switch-label">
+                                <span>Marketing Emails</span>
+                                <div class="switch">
+                                    <input type="checkbox" name="marketing_emails">
+                                    <span class="slider round"></span>
+                                </div>
+                            </label>
+                            <p class="form-text">Receive updates about new features and promotions</p>
+                        </div>
+                        
+                        <button type="submit" class="btn">Save Changes</button>
+                    </form>
+                </div>
+                
+                <!-- Security Tab -->
+                <div class="settings-tab" id="security-tab">
+                    <h2>Security Settings</h2>
+                    <form action="{{ url_for('settings') }}" method="post" class="settings-form">
+                        <div class="form-section">
+                            <h3>Change Password</h3>
+                            <div class="form-group">
+                                <label for="current_password" class="form-label">Current Password</label>
+                                <input type="password" id="current_password" name="current_password" class="form-control">
+                            </div>
+                            
+                            <div class="form-group">
+                                <label for="new_password" class="form-label">New Password</label>
+                                <input type="password" id="new_password" name="new_password" class="form-control">
+                            </div>
+                            
+                            <div class="form-group">
+                                <label for="confirm_password" class="form-label">Confirm New Password</label>
+                                <input type="password" id="confirm_password" name="confirm_password" class="form-control">
+                            </div>
+                        </div>
+                        
+                        <div class="form-section">
+                            <h3>Two-Factor Authentication</h3>
+                            <div class="form-group form-switch">
+                                <label class="switch-label">
+                                    <span>Enable Two-Factor Authentication</span>
+                                    <div class="switch">
+                                        <input type="checkbox" name="two_factor">
+                                        <span class="slider round"></span>
+                                    </div>
+                                </label>
+                                <p class="form-text">Add an extra layer of security to your account</p>
+                            </div>
+                        </div>
+                        
+                        <button type="submit" class="btn">Save Changes</button>
+                    </form>
+                </div>
+                
+                <!-- Privacy Tab -->
+                <div class="settings-tab" id="privacy-tab">
+                    <h2>Privacy Settings</h2>
+                    <form action="{{ url_for('settings') }}" method="post" class="settings-form">
+                        <div class="form-group form-switch">
+                            <label class="switch-label">
+                                <span>Store Image History</span>
+                                <div class="switch">
+                                    <input type="checkbox" name="store_history" checked>
+                                    <span class="slider round"></span>
+                                </div>
+                            </label>
+                            <p class="form-text">Keep a history of your enhanced images</p>
+                        </div>
+                        
+                        <div class="form-group form-switch">
+                            <label class="switch-label">
+                                <span>Data Collection</span>
+                                <div class="switch">
+                                    <input type="checkbox" name="data_collection" checked>
+                                    <span class="slider round"></span>
+                                </div>
+                            </label>
+                            <p class="form-text">Allow us to collect anonymous usage data to improve our service</p>
+                        </div>
+                        
+                        <div class="form-group">
+                            <button type="button" class="btn btn-danger" id="delete-account-btn">
+                                Delete Account
+                            </button>
+                            <p class="form-text">This action cannot be undone. All your data will be permanently deleted.</p>
+                        </div>
+                        
+                        <button type="submit" class="btn">Save Changes</button>
+                    </form>
+                </div>
+                
+                <!-- Connected Accounts Tab -->
+                <div class="settings-tab" id="connected-tab">
+                    <h2>Connected Accounts</h2>
+                    <div class="connected-accounts">
+                        <div class="connected-account">
+                            <div class="account-info">
+                                <i class="fab fa-google"></i>
+                                <div>
+                                    <h4>Google</h4>
+                                    <p>Not connected</p>
+                                </div>
+                            </div>
+                            <button class="btn btn-sm">Connect</button>
+                        </div>
+                        
+                        <div class="connected-account">
+                            <div class="account-info">
+                                <i class="fab fa-facebook"></i>
+                                <div>
+                                    <h4>Facebook</h4>
+                                    <p>Not connected</p>
+                                </div>
+                            </div>
+                            <button class="btn btn-sm">Connect</button>
+                        </div>
+                        
+                        <div class="connected-account">
+                            <div class="account-info">
+                                <i class="fab fa-twitter"></i>
+                                <div>
+                                    <h4>Twitter</h4>
+                                    <p>Not connected</p>
+                                </div>
+                            </div>
+                            <button class="btn btn-sm">Connect</button>
+                        </div>
+                        
+                        <div class="connected-account">
+                            <div class="account-info">
+                                <i class="fab fa-github"></i>
+                                <div>
+                                    <h4>GitHub</h4>
+                                    <p>Not connected</p>
+                                </div>
+                            </div>
+                            <button class="btn btn-sm">Connect</button>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Delete Account Confirmation Modal -->
+<div class="modal" id="delete-account-modal">
+    <div class="modal-content">
+        <div class="modal-header">
+            <h3>Delete Account</h3>
+            <span class="close-modal">&times;</span>
+        </div>
+        <div class="modal-body">
+            <p>Are you sure you want to delete your account? This action cannot be undone and all your data will be permanently deleted.</p>
+            <div class="form-group">
+                <label for="delete-confirm" class="form-label">Type "DELETE" to confirm</label>
+                <input type="text" id="delete-confirm" class="form-control">
+            </div>
+        </div>
+        <div class="modal-footer">
+            <button class="btn btn-secondary" id="cancel-delete-account">Cancel</button>
+            <button class="btn btn-danger" id="confirm-delete-account" disabled>Delete Account</button>
+        </div>
+    </div>
+</div>
+{% endblock %}
+
+{% block extra_js %}
+<script>
+    document.addEventListener('DOMContentLoaded', function() {
+        // Tab switching functionality
+        const tabLinks = document.querySelectorAll('.settings-nav li');
+        const tabContents = document.querySelectorAll('.settings-tab');
+        
+        tabLinks.forEach(link => {
+            link.addEventListener('click', function() {
+                // Remove active class from all links and tabs
+                tabLinks.forEach(l => l.classList.remove('active'));
+                tabContents.forEach(t => t.classList.remove('active'));
+                
+                // Add active class to clicked link
+                this.classList.add('active');
+                
+                // Show corresponding tab
+                const tabId = this.dataset.tab + '-tab';
+                document.getElementById(tabId).classList.add('active');
+            });
+        });
+        
+        // Theme option selection
+        const themeOptions = document.querySelectorAll('.theme-option');
+        
+        themeOptions.forEach(option => {
+            option.addEventListener('click', function() {
+                // Select the radio button
+                const radio = this.querySelector('input[type="radio"]');
+                radio.checked = true;
+                
+                // Update active class
+                themeOptions.forEach(o => o.classList.remove('active'));
+                this.classList.add('active');
+                
+                // Apply theme immediately for preview
+                const isDarkMode = radio.value === 'on';
+                document.body.classList.toggle('dark-mode', isDarkMode);
+            });
+        });
+        
+        // Color option selection
+        const colorOptions = document.querySelectorAll('.color-option');
+        
+        colorOptions.forEach(option => {
+            option.addEventListener('click', function() {
+                // Select the radio button
+                const radio = this.querySelector('input[type="radio"]');
+                radio.checked = true;
+                
+                // Update active class
+                colorOptions.forEach(o => o.classList.remove('active'));
+                this.classList.add('active');
+                
+                // Apply color immediately for preview
+                const color = getComputedStyle(this).getPropertyValue('--color');
+                document.documentElement.style.setProperty('--primary-color', color);
+            });
+        });
+        
+        // Delete account functionality
+        const deleteAccountBtn = document.getElementById('delete-account-btn');
+        const deleteAccountModal = document.getElementById('delete-account-modal');
+        const confirmDeleteAccountBtn = document.getElementById('confirm-delete-account');
+        const cancelDeleteAccountBtn = document.getElementById('cancel-delete-account');
+        const deleteConfirmInput = document.getElementById('delete-confirm');
+        const closeModalButtons = document.querySelectorAll('.close-modal');
+        
+        if (deleteAccountBtn) {
+            deleteAccountBtn.addEventListener('click', function() {
+                if (deleteAccountModal) deleteAccountModal.style.display = 'block';
+            });
+        }
+        
+        if (deleteConfirmInput) {
+            deleteConfirmInput.addEventListener('input', function() {
+                confirmDeleteAccountBtn.disabled = this.value !== 'DELETE';
+            });
+        }
+        
+        if (cancelDeleteAccountBtn) {
+            cancelDeleteAccountBtn.addEventListener('click', function() {
+                deleteAccountModal.style.display = 'none';
+                deleteConfirmInput.value = '';
+                confirmDeleteAccountBtn.disabled = true;
+            });
+        }
+        
+        // Close modals when clicking outside
+        closeModalButtons.forEach(button => {
+            button.addEventListener('click', function() {
+                const modal = this.closest('.modal');
+                if (modal) modal.style.display = 'none';
+                
+                // Reset delete confirmation
+                if (modal.id === 'delete-account-modal') {
+                    deleteConfirmInput.value = '';
+                    confirmDeleteAccountBtn.disabled = true;
+                }
+            });
+        });
+        
+        window.addEventListener('click', function(event) {
+            if (event.target.classList.contains('modal')) {
+                event.target.style.display = 'none';
+                
+                // Reset delete confirmation
+                if (event.target.id === 'delete-account-modal') {
+                    deleteConfirmInput.value = '';
+                    confirmDeleteAccountBtn.disabled = true;
+                }
+            }
+        });
+    });
+</script>
+{% endblock %}

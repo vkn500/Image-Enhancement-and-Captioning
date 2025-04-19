@@ -1,0 +1,209 @@
+{% extends 'base.html' %}
+
+{% block title %}Upload Image - ImageAI Enhancer{% endblock %}
+
+{% block extra_css %}
+<style>
+    .upload-header {
+        text-align: center;
+        margin-bottom: 40px;
+    }
+    
+    .upload-title {
+        font-size: 2.5rem;
+        color: var(--primary-color);
+        margin-bottom: 10px;
+    }
+    
+    .upload-subtitle {
+        color: var(--light-text);
+        font-size: 1.2rem;
+    }
+    
+    .upload-container {
+        max-width: 600px;
+        margin: 0 auto;
+    }
+    
+    .upload-area {
+        background-color: var(--card-bg);
+        border: 2px dashed var(--primary-color);
+        border-radius: var(--border-radius);
+        padding: 50px;
+        text-align: center;
+        cursor: pointer;
+        transition: var(--transition);
+        margin-bottom: 30px;
+    }
+    
+    .upload-area.active {
+        background-color: rgba(108, 99, 255, 0.05);
+    }
+    
+    .upload-area:hover {
+        background-color: rgba(108, 99, 255, 0.05);
+    }
+    
+    .upload-icon {
+        font-size: 4rem;
+        color: var(--primary-color);
+        margin-bottom: 20px;
+    }
+    
+    .upload-text {
+        font-size: 1.5rem;
+        margin-bottom: 10px;
+    }
+    
+    .upload-subtext {
+        color: var(--light-text);
+        margin-bottom: 20px;
+    }
+    
+    .file-types {
+        display: flex;
+        justify-content: center;
+        gap: 10px;
+        margin-bottom: 20px;
+    }
+    
+    .file-type {
+        background-color: rgba(108, 99, 255, 0.1);
+        color: var(--primary-color);
+        padding: 5px 10px;
+        border-radius: 5px;
+        font-size: 0.9rem;
+    }
+    
+    .upload-btn {
+        display: inline-block;
+    }
+    
+    .back-link {
+        display: inline-flex;
+        align-items: center;
+        color: var(--primary-color);
+        text-decoration: none;
+        font-weight: 500;
+        margin-bottom: 30px;
+        transition: var(--transition);
+    }
+    
+    .back-link i {
+        margin-right: 10px;
+    }
+    
+    .back-link:hover {
+        color: var(--secondary-color);
+    }
+    
+    .upload-tips {
+        background-color: var(--card-bg);
+        border-radius: var(--border-radius);
+        box-shadow: var(--box-shadow);
+        padding: 30px;
+        margin-top: 40px;
+    }
+    
+    .tips-title {
+        font-size: 1.5rem;
+        color: var(--primary-color);
+        margin-bottom: 20px;
+    }
+    
+    .tips-list {
+        list-style: none;
+    }
+    
+    .tips-item {
+        display: flex;
+        align-items: flex-start;
+        margin-bottom: 15px;
+    }
+    
+    .tips-icon {
+        color: var(--primary-color);
+        margin-right: 15px;
+        font-size: 1.2rem;
+    }
+    
+    .tips-text {
+        flex: 1;
+    }
+</style>
+{% endblock %}
+
+{% block content %}
+<div class="container">
+    <a href="{{ url_for('image_source') }}" class="back-link fade-in">
+        <i class="fas fa-arrow-left"></i> Back to Image Source
+    </a>
+    
+    <div class="upload-header fade-in">
+        <h1 class="upload-title">Upload Image</h1>
+        <p class="upload-subtitle">Select an image from your device to enhance and caption</p>
+    </div>
+    
+    <div class="upload-container slide-up">
+        <form action="{{ url_for('upload_image') }}" method="post" enctype="multipart/form-data">
+            <div class="upload-area" id="upload-area">
+                <div class="upload-icon">
+                    <i class="fas fa-cloud-upload-alt"></i>
+                </div>
+                <h2 class="upload-text">Drag & Drop your image here</h2>
+                <p class="upload-subtext">or click to browse files</p>
+                
+                <div class="file-types">
+                    <span class="file-type">JPG</span>
+                    <span class="file-type">PNG</span>
+                    <span class="file-type">JPEG</span>
+                </div>
+                
+                <div class="upload-btn">
+                    <div class="btn">Browse Files</div>
+                </div>
+                
+                <input type="file" id="file-input" name="image" accept=".jpg,.jpeg,.png" style="display: none;">
+            </div>
+        </form>
+        
+        <div class="upload-tips slide-up">
+            <h3 class="tips-title">Tips for Best Results</h3>
+            <ul class="tips-list">
+                <li class="tips-item">
+                    <div class="tips-icon">
+                        <i class="fas fa-check-circle"></i>
+                    </div>
+                    <div class="tips-text">
+                        <strong>Image Quality:</strong> For best enhancement results, use images with clear subjects and minimal motion blur.
+                    </div>
+                </li>
+                <li class="tips-item">
+                    <div class="tips-icon">
+                        <i class="fas fa-check-circle"></i>
+                    </div>
+                    <div class="tips-text">
+                        <strong>File Size:</strong> Maximum file size is 16MB. Larger files will be automatically compressed.
+                    </div>
+                </li>
+                <li class="tips-item">
+                    <div class="tips-icon">
+                        <i class="fas fa-check-circle"></i>
+                    </div>
+                    <div class="tips-text">
+                        <strong>Supported Formats:</strong> We support JPG, JPEG, and PNG formats for optimal processing.
+                    </div>
+                </li>
+                <li class="tips-item">
+                    <div class="tips-icon">
+                        <i class="fas fa-check-circle"></i>
+                    </div>
+                    <div class="tips-text">
+                        <strong>Processing Time:</strong> Enhancement and captioning typically takes 5-10 seconds depending on image size.
+                    </div>
+                </li>
+            </ul>
+        </div>
+    </div>
+</div>
+{% endblock %} 

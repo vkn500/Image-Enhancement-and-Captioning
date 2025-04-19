@@ -1,0 +1,139 @@
+{% extends 'base.html' %}
+
+{% block title %}Select Image Source - ImageAI Enhancer{% endblock %}
+
+{% block extra_css %}
+<style>
+    .source-header {
+        text-align: center;
+        margin-bottom: 40px;
+    }
+    
+    .source-title {
+        font-size: 2.5rem;
+        color: var(--primary-color);
+        margin-bottom: 10px;
+    }
+    
+    .source-subtitle {
+        color: var(--light-text);
+        font-size: 1.2rem;
+    }
+    
+    .source-options {
+        display: grid;
+        grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+        gap: 30px;
+    }
+    
+    .source-option {
+        background-color: var(--card-bg);
+        border-radius: var(--border-radius);
+        box-shadow: var(--box-shadow);
+        padding: 40px 30px;
+        text-align: center;
+        transition: var(--transition);
+        cursor: pointer;
+        position: relative;
+        overflow: hidden;
+    }
+    
+    .source-option::before {
+        content: '';
+        position: absolute;
+        top: 0;
+        left: 0;
+        width: 100%;
+        height: 100%;
+        background: linear-gradient(135deg, var(--primary-color) 0%, var(--secondary-color) 100%);
+        opacity: 0;
+        z-index: 0;
+        transition: opacity 0.3s ease;
+    }
+    
+    .source-option:hover {
+        transform: translateY(-10px);
+        box-shadow: 0 15px 35px rgba(0, 0, 0, 0.1);
+    }
+    
+    .source-option:hover::before {
+        opacity: 0.05;
+    }
+    
+    .source-option-content {
+        position: relative;
+        z-index: 1;
+    }
+    
+    .source-icon {
+        font-size: 4rem;
+        color: var(--primary-color);
+        margin-bottom: 20px;
+    }
+    
+    .source-option-title {
+        font-size: 1.8rem;
+        margin-bottom: 15px;
+    }
+    
+    .source-option-description {
+        color: var(--light-text);
+        margin-bottom: 25px;
+    }
+    
+    .back-link {
+        display: inline-flex;
+        align-items: center;
+        color: var(--primary-color);
+        text-decoration: none;
+        font-weight: 500;
+        margin-bottom: 30px;
+        transition: var(--transition);
+    }
+    
+    .back-link i {
+        margin-right: 10px;
+    }
+    
+    .back-link:hover {
+        color: var(--secondary-color);
+    }
+</style>
+{% endblock %}
+
+{% block content %}
+<div class="container">
+    <a href="{{ url_for('dashboard') }}" class="back-link fade-in">
+        <i class="fas fa-arrow-left"></i> Back to Dashboard
+    </a>
+    
+    <div class="source-header fade-in">
+        <h1 class="source-title">Choose Image Source</h1>
+        <p class="source-subtitle">Select how you want to provide an image for enhancement and captioning</p>
+    </div>
+    
+    <div class="source-options">
+        <a href="{{ url_for('upload_image') }}" class="source-option slide-up">
+            <div class="source-option-content">
+                <div class="source-icon">
+                    <i class="fas fa-upload"></i>
+                </div>
+                <h2 class="source-option-title">Upload Image</h2>
+                <p class="source-option-description">Upload an image from your device to enhance and caption.</p>
+                <div class="btn">Select File</div>
+            </div>
+        </a>
+        
+        <a href="{{ url_for('capture_image') }}" class="source-option slide-up" style="animation-delay: 0.1s;">
+            <div class="source-option-content">
+                <div class="source-icon">
+                    <i class="fas fa-camera"></i>
+                </div>
+                <h2 class="source-option-title">Capture Image</h2>
+                <p class="source-option-description">Use your camera to take a photo for enhancement and captioning.</p>
+                <div class="btn">Open Camera</div>
+            </div>
+        </a>
+    </div>
+</div>
+{% endblock %} 

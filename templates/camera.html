@@ -1,0 +1,231 @@
+{% extends 'base.html' %}
+
+{% block title %}Take Photo - Image Enhancer{% endblock %}
+
+{% block content %}
+<div class="container">
+    <div class="camera-container">
+        <h1 class="section-title">Take a Photo</h1>
+        <p class="section-subtitle">Use your camera to take a photo for enhancement.</p>
+        
+        <div class="camera-view">
+            <video id="camera-view" autoplay playsinline></video>
+            <canvas id="canvas"></canvas>
+            <div id="camera-loading" class="camera-loading">
+                <div class="spinner"></div>
+                <p>Initializing camera...</p>
+            </div>
+            <div id="camera-error" class="camera-error" style="display: none;">
+                <i class="fas fa-exclamation-circle"></i>
+                <p>Camera access denied or not available</p>
+                <a href="{{ url_for('upload_page') }}" class="btn btn-secondary">Upload Image Instead</a>
+            </div>
+        </div>
+        
+        <form action="{{ url_for('process_camera') }}" method="post">
+            <input type="hidden" id="image-input" name="image">
+            <div class="camera-controls">
+                <button type="button" id="capture-button" class="btn">Capture Photo</button>
+                <button type="button" id="retake-button" class="btn btn-secondary">Retake</button>
+                <button type="submit" id="submit-button" class="btn">Enhance Photo</button>
+                <button type="button" id="switch-camera" class="btn btn-secondary">Switch Camera</button>
+            </div>
+        </form>
+    </div>
+</div>
+{% endblock %}
+
+{% block extra_js %}
+<script>
+    document.addEventListener('DOMContentLoaded', function() {
+        const videoElement = document.querySelector('#camera-view');
+        const captureButton = document.querySelector('#capture-button');
+        const retakeButton = document.querySelector('#retake-button');
+        const submitButton = document.querySelector('#submit-button');
+        const switchCameraButton = document.querySelector('#switch-camera');
+        const canvasElement = document.querySelector('#canvas');
+        const imageInput = document.querySelector('#image-input');
+        const cameraLoading = document.querySelector('#camera-loading');
+        const cameraError = document.querySelector('#camera-error');
+        
+        let stream = null;
+        let facingMode = 'environment'; // Start with back camera
+        let isInitializing = false;
+        
+        // Hide retake and submit buttons initially
+        retakeButton.style.display = 'none';
+        submitButton.style.display = 'none';
+        
+        // Start camera with optimized constraints
+        async function startCamera() {
+            if (isInitializing) return;
+            isInitializing = true;
+            
+            // Show loading indicator
+            cameraLoading.style.display = 'flex';
+            cameraError.style.display = 'none';
+            
+            // Stop any existing stream
+            stopCamera();
+            
+            try {
+                // Try to get the camera with ideal resolution first
+                const constraints = {
+                    video: { 
+                        facingMode: facingMode,
+                        width: { ideal: 1280 },
+                        height: { ideal: 720 }
+                    }
+                };
+                
+                stream = await navigator.mediaDevices.getUserMedia(constraints);
+                
+                // Set up video element
+                videoElement.srcObject = stream;
+                videoElement.style.display = 'block';
+                canvasElement.style.display = 'none';
+                
+                // Show/hide appropriate buttons
+                captureButton.style.display = 'inline-block';
+                retakeButton.style.display = 'none';
+                submitButton.style.display = 'none';
+                
+                // Hide loading indicator
+                cameraLoading.style.display = 'none';
+                
+                // Wait for video to be ready
+                await new Promise(resolve => {
+                    videoElement.onloadedmetadata = () => {
+                        resolve();
+                    };
+                });
+                
+                // Play video
+                await videoElement.play();
+                
+            } catch (err) {
+                console.error('Error accessing camera:', err);
+                
+                // Show error message
+                cameraLoading.style.display = 'none';
+                cameraError.style.display = 'flex';
+                
+                // Try fallback to any camera if specific facing mode failed
+                if (facingMode === 'environment' || facingMode === 'user') {
+                    try {
+                        stream = await navigator.mediaDevices.getUserMedia({ 
+                            video: true 
+                        });
+                        
+                        videoElement.srcObject = stream;
+                        videoElement.style.display = 'block';
+                        cameraError.style.display = 'none';
+                        
+                        // Show capture button
+                        captureButton.style.display = 'inline-block';
+                        
+                    } catch (fallbackErr) {
+                        console.error('Fallback camera also failed:', fallbackErr);
+                    }
+                }
+            } finally {
+                isInitializing = false;
+            }
+        }
+        
+        // Stop camera
+        function stopCamera() {
+            if (stream) {
+                stream.getTracks().forEach(track => track.stop());
+                stream = null;
+            }
+        }
+        
+        // Capture image with optimized quality
+        function captureImage() {
+            if (!stream) return;
+            
+            const context = canvasElement.getContext('2d');
+            
+            // Set canvas dimensions to match video
+            canvasElement.width = videoElement.videoWidth;
+            canvasElement.height = videoElement.videoHeight;
+            
+            // Draw video frame to canvas
+            context.drawImage(videoElement, 0, 0, canvasElement.width, canvasElement.height);
+            
+            // Convert canvas to data URL with optimized quality
+            const imageData = canvasElement.toDataURL('image/jpeg', 0.9);
+            
+            // Set the image data to the hidden input
+            imageInput.value = imageData;
+            
+            // Show canvas and hide video
+            videoElement.style.display = 'none';
+            canvasElement.style.display = 'block';
+            captureButton.style.display = 'none';
+            retakeButton.style.display = 'inline-block';
+            submitButton.style.display = 'inline-block';
+            
+            // Stop the camera to save resources
+            stopCamera();
+        }
+        
+        // Switch between front and back camera
+        function switchCamera() {
+            facingMode = facingMode === 'environment' ? 'user' : 'environment';
+            startCamera();
+        }
+        
+        // Start camera when page loads
+        startCamera();
+        
+        // Capture button click
+        captureButton.addEventListener('click', captureImage);
+        
+        // Retake button click
+        retakeButton.addEventListener('click', startCamera);
+        
+        // Switch camera button click
+        switchCameraButton.addEventListener('click', switchCamera);
+        
+        // Clean up when leaving the page
+        window.addEventListener('beforeunload', stopCamera);
+    });
+</script>
+
+<style>
+    .camera-loading, .camera-error {
+        position: absolute;
+        top: 0;
+        left: 0;
+        width: 100%;
+        height: 100%;
+        display: flex;
+        flex-direction: column;
+        justify-content: center;
+        align-items: center;
+        background-color: rgba(0, 0, 0, 0.7);
+        color: white;
+        z-index: 10;
+    }
+    
+    .camera-error {
+        text-align: center;
+    }
+    
+    .camera-error i {
+        font-size: 3rem;
+        color: var(--accent-color);
+        margin-bottom: 1rem;
+    }
+    
+    .camera-error .btn {
+        margin-top: 1rem;
+    }
+    
+    .camera-view {
+        position: relative;
+    }
+</style>
+{% endblock %} 

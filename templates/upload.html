@@ -1,0 +1,24 @@
+{% extends 'base.html' %}
+
+{% block title %}Upload Image - Image Enhancer{% endblock %}
+
+{% block content %}
+<div class="container">
+    <div class="upload-container">
+        <h1 class="section-title">Upload an Image</h1>
+        <p class="section-subtitle">Select an image from your device to enhance.</p>
+        
+        <form action="{{ url_for('process_upload') }}" method="post" enctype="multipart/form-data">
+            <div class="upload-area" id="upload-area">
+                <div class="upload-icon">
+                    <i class="fas fa-cloud-upload-alt"></i>
+                </div>
+                <h3 class="upload-text">Drag & Drop or Click to Upload</h3>
+                <p class="file-types">Supported formats: JPG, PNG, JPEG, WEBP</p>
+            </div>
+            <input type="file" id="file-input" name="file" accept=".jpg,.jpeg,.png,.webp" style="display: none;">
+            <button type="submit" class="btn">Upload & Enhance</button>
+        </form>
+    </div>
+</div>
+{% endblock %} 

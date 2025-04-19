@@ -1,0 +1,421 @@
+{% extends 'base.html' %}
+
+{% block title %}Contact Us - Image Enhancer{% endblock %}
+
+{% block extra_css %}
+<style>
+    .contact-page {
+        padding: 60px 0;
+    }
+    
+    .section-subtitle {
+        color: var(--light-text);
+        margin-bottom: 40px;
+        text-align: center;
+    }
+    
+    .contact-container {
+        display: grid;
+        grid-template-columns: 1fr 1fr;
+        gap: 40px;
+        margin-bottom: 60px;
+    }
+    
+    .contact-info {
+        display: grid;
+        grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+        gap: 20px;
+    }
+    
+    .contact-card {
+        background-color: var(--card-bg);
+        border-radius: 10px;
+        padding: 25px;
+        box-shadow: 0 5px 15px rgba(0, 0, 0, 0.05);
+        transition: transform 0.3s ease, box-shadow 0.3s ease;
+        text-align: center;
+    }
+    
+    .contact-card:hover {
+        transform: translateY(-5px);
+        box-shadow: 0 10px 25px rgba(108, 99, 255, 0.15);
+    }
+    
+    .contact-icon {
+        width: 60px;
+        height: 60px;
+        border-radius: 50%;
+        background-color: rgba(108, 99, 255, 0.1);
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        margin: 0 auto 15px;
+    }
+    
+    .contact-icon i {
+        font-size: 1.5rem;
+        color: var(--primary-color);
+    }
+    
+    .contact-card h3 {
+        font-size: 1.2rem;
+        margin-bottom: 10px;
+        color: var(--text-color);
+    }
+    
+    .contact-card p {
+        color: var(--light-text);
+        margin-bottom: 5px;
+    }
+    
+    .contact-card a {
+        color: var(--light-text);
+        text-decoration: none;
+        transition: color 0.2s;
+    }
+    
+    .contact-card a:hover {
+        color: var(--primary-color);
+    }
+    
+    .social-icons {
+        display: flex;
+        justify-content: center;
+        flex-wrap: wrap;
+        gap: 10px;
+        margin-top: 10px;
+    }
+    
+    .social-icon {
+        display: flex;
+        flex-direction: column;
+        align-items: center;
+        padding: 10px;
+        border-radius: 5px;
+        transition: background-color 0.3s;
+    }
+    
+    .social-icon:hover {
+        background-color: rgba(108, 99, 255, 0.1);
+    }
+    
+    .social-icon i {
+        font-size: 1.2rem;
+        margin-bottom: 5px;
+    }
+    
+    .social-icon p {
+        font-size: 0.8rem;
+        margin: 0;
+    }
+    
+    .contact-form-container {
+        background-color: var(--card-bg);
+        border-radius: 10px;
+        padding: 30px;
+        box-shadow: 0 5px 15px rgba(0, 0, 0, 0.05);
+    }
+    
+    .contact-form-container h2 {
+        margin-bottom: 25px;
+        text-align: center;
+        color: var(--text-color);
+    }
+    
+    .form-group {
+        margin-bottom: 20px;
+    }
+    
+    .form-label {
+        display: block;
+        margin-bottom: 8px;
+        font-weight: 500;
+        color: var(--text-color);
+    }
+    
+    .form-control {
+        width: 100%;
+        padding: 12px 15px;
+        border: 1px solid var(--border-color);
+        border-radius: 5px;
+        font-family: inherit;
+        font-size: 1rem;
+        background-color: var(--card-bg);
+        color: var(--text-color);
+        transition: border-color 0.3s, box-shadow 0.3s;
+    }
+    
+    .form-control:focus {
+        border-color: var(--primary-color);
+        box-shadow: 0 0 0 3px rgba(108, 99, 255, 0.2);
+        outline: none;
+    }
+    
+    .dark-mode .form-control {
+        background-color: #2a2a2a;
+        color: #f0f0f0;
+        border-color: #444;
+    }
+    
+    .dark-mode .form-control:focus {
+        border-color: var(--primary-color);
+        box-shadow: 0 0 0 3px rgba(140, 131, 255, 0.3);
+    }
+    
+    textarea.form-control {
+        resize: vertical;
+        min-height: 120px;
+    }
+    
+    .contact-form .btn {
+        width: 100%;
+        padding: 12px;
+        font-size: 1rem;
+        font-weight: 500;
+    }
+    
+    .map-container {
+        margin-bottom: 60px;
+    }
+    
+    .map-container h2 {
+        margin-bottom: 20px;
+        text-align: center;
+        color: var(--text-color);
+    }
+    
+    .map {
+        border-radius: 10px;
+        overflow: hidden;
+        box-shadow: 0 5px 15px rgba(0, 0, 0, 0.05);
+    }
+    
+    .faq-section {
+        margin-bottom: 40px;
+    }
+    
+    .faq-section h2 {
+        margin-bottom: 30px;
+        text-align: center;
+        color: var(--text-color);
+    }
+    
+    .faq-container {
+        max-width: 800px;
+        margin: 0 auto;
+    }
+    
+    .faq-item {
+        margin-bottom: 15px;
+        border-radius: 10px;
+        background-color: var(--card-bg);
+        box-shadow: 0 3px 10px rgba(0, 0, 0, 0.05);
+        overflow: hidden;
+    }
+    
+    .faq-question {
+        padding: 20px;
+        cursor: pointer;
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+    }
+    
+    .faq-question h3 {
+        margin: 0;
+        font-size: 1.1rem;
+        color: var(--text-color);
+    }
+    
+    .faq-toggle {
+        color: var(--primary-color);
+        transition: transform 0.3s;
+    }
+    
+    .faq-answer {
+        padding: 0 20px;
+        max-height: 0;
+        overflow: hidden;
+        transition: max-height 0.3s ease, padding 0.3s ease;
+    }
+    
+    .faq-item.active .faq-answer {
+        padding: 0 20px 20px;
+        max-height: 500px;
+    }
+    
+    .faq-answer p {
+        color: var(--light-text);
+        line-height: 1.6;
+    }
+    
+    @media (max-width: 992px) {
+        .contact-container {
+            grid-template-columns: 1fr;
+        }
+    }
+    
+    @media (max-width: 768px) {
+        .contact-info {
+            grid-template-columns: 1fr;
+        }
+    }
+</style>
+{% endblock %}
+
+{% block content %}
+<div class="container">
+    <div class="contact-page">
+        <h1 class="section-title">Contact Us</h1>
+        <p class="section-subtitle">We'd love to hear from you. Get in touch with our team.</p>
+        
+        <div class="contact-container">
+            <div class="contact-info">
+                <div class="contact-card">
+                    <div class="contact-icon">
+                        <i class="fas fa-map-marker-alt"></i>
+                    </div>
+                    <h3>Our Location</h3>
+                    <p>SSIPMT, Raipur, Pincode-492010</p>
+                    <p>Chhattisgarh, India</p>
+                </div>
+                
+                <div class="contact-card">
+                    <div class="contact-icon">
+                        <i class="fas fa-envelope"></i>
+                    </div>
+                    <h3>Email Us</h3>
+                    <p><a href="support@phoolbaneangare.com">supp@phoolbaneangare.com</a></p>
+                    <p><a href="info@phoolbaneangare.com">info@phoolbaneangare.com</a></p>
+                </div>
+                
+                <div class="contact-card">
+                    <div class="contact-icon">
+                        <i class="fas fa-phone-alt"></i>
+                    </div>
+                    <h3>Call Us</h3>
+                    <p>+91 9090151632</p>
+                    <p>Mon-Fri: 9am - 5pm IST</p>
+                </div>
+                
+                <div class="contact-card">
+                    <div class="contact-icon">
+                        <i class="fas fa-comments"></i>
+                    </div>
+                    <h3>Social Media</h3>
+                    <div class="social-icons">
+                        <a href="https://www.facebook.com" class="social-icon"><i class="fab fa-facebook-f"></i><p>Facebook</p></a>
+                        <a href="https://twiter.com" class="social-icon"><i class="fab fa-twitter"></i><p>Twitter</p></a>
+                        <a href="https://www.instagram.com" class="social-icon"><i class="fab fa-instagram"></i><p>Instagram</p></a>
+                        <a href="https://www.linkedin.com" class="social-icon"><i class="fab fa-linkedin-in"></i><p>LinkedIn</p></a>
+                    </div>
+                </div>
+            </div>
+            
+            <div class="contact-form-container">
+                <h2>Send Us a Message</h2>
+                <form action="{{ url_for('contact') }}" method="post" class="contact-form">
+                    <div class="form-group">
+                        <label for="name" class="form-label">Your Name</label>
+                        <input type="text" id="name" name="name" class="form-control" required>
+                    </div>
+                    
+                    <div class="form-group">
+                        <label for="email" class="form-label">Your Email</label>
+                        <input type="email" id="email" name="email" class="form-control" required>
+                    </div>
+                    
+                    <div class="form-group">
+                        <label for="subject" class="form-label">Subject</label>
+                        <input type="text" id="subject" name="subject" class="form-control" required>
+                    </div>
+                    
+                    <div class="form-group">
+                        <label for="message" class="form-label">Message</label>
+                        <textarea id="message" name="message" rows="5" class="form-control" required></textarea>
+                    </div>
+                    
+                    <button type="submit" class="btn">Send Message</button>
+                </form>
+            </div>
+        </div>
+        
+        <div class="map-container">
+            <h2>Find Us</h2>
+            <div class="map">
+                <iframe src="https://www.google.com/maps/embed?pb=!1m18!1m12!1m3!1d3153.0968143526147!2d-122.41941638468173!3d37.77492997975903!2m3!1f0!2f0!3f0!3m2!1i1024!2i768!4f13.1!3m3!1m2!1s0x8085809c6c8f4459%3A0xb10ed6d9b5050fa5!2sSan%20Francisco%2C%20CA!5e0!3m2!1sen!2sus!4v1626384420000!5m2!1sen!2sus" width="100%" height="450" style="border:0;" allowfullscreen="" loading="lazy"></iframe>
+            </div>
+        </div>
+        
+        <div class="faq-section">
+            <h2>Frequently Asked Questions</h2>
+            <div class="faq-container">
+                <div class="faq-item">
+                    <div class="faq-question">
+                        <h3>How does the image enhancement work?</h3>
+                        <span class="faq-toggle"><i class="fas fa-chevron-down"></i></span>
+                    </div>
+                    <div class="faq-answer">
+                        <p>Our image enhancement technology uses advanced AI algorithms to analyze your images and improve various aspects such as resolution, lighting, color balance, and detail sharpness. The process is fully automated and takes just seconds to complete.</p>
+                    </div>
+                </div>
+                
+                <div class="faq-item">
+                    <div class="faq-question">
+                        <h3>Is my data secure?</h3>
+                        <span class="faq-toggle"><i class="fas fa-chevron-down"></i></span>
+                    </div>
+                    <div class="faq-answer">
+                        <p>Yes, we take data security very seriously. Your images are processed securely and are not shared with third parties. We also offer the option to delete your images from our servers after processing.</p>
+                    </div>
+                </div>
+                
+                <div class="faq-item">
+                    <div class="faq-question">
+                        <h3>What file formats are supported?</h3>
+                        <span class="faq-toggle"><i class="fas fa-chevron-down"></i></span>
+                    </div>
+                    <div class="faq-answer">
+                        <p>We currently support JPG, JPEG, PNG, and WEBP file formats. We're working on adding support for more formats in the future.</p>
+                    </div>
+                </div>
+                
+                <div class="faq-item">
+                    <div class="faq-question">
+                        <h3>How can I get help if I have issues?</h3>
+                        <span class="faq-toggle"><i class="fas fa-chevron-down"></i></span>
+                    </div>
+                    <div class="faq-answer">
+                        <p>You can reach our support team via email at support@imageenhancer.com or by filling out the contact form on this page. We typically respond within 24 hours.</p>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}
+
+{% block extra_js %}
+<script>
+    document.addEventListener('DOMContentLoaded', function() {
+        // FAQ toggle functionality
+        const faqQuestions = document.querySelectorAll('.faq-question');
+        
+        faqQuestions.forEach(question => {
+            question.addEventListener('click', () => {
+                const faqItem = question.parentElement;
+                faqItem.classList.toggle('active');
+                
+                const icon = question.querySelector('.faq-toggle i');
+                if (faqItem.classList.contains('active')) {
+                    icon.classList.remove('fa-chevron-down');
+                    icon.classList.add('fa-chevron-up');
+                } else {
+                    icon.classList.remove('fa-chevron-up');
+                    icon.classList.add('fa-chevron-down');
+                }
+            });
+        });
+    });
+</script>
+{% endblock %} 
